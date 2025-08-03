@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .image{
+            margin-top: 10px; 
+        }
+        .gap{
+            margin-top: -40px;
+        }
+        table, th, td {
+            border-collapse: collapse;
+        }
+        .push{
+            padding-left: 75%;
+        }
+    </style>
+</head>
+<body>
+    <div class="justify-content-center d-flex h2"><i>TAX INVOICE</i></div>
+    <form>
+        <table class="table-bordered w-100 p-2">
+            <tr>
+                <td class="p-1"><b>Company Name: AITEK SERVICES PTE LTD</b><br>
+                    111 North Bridge Road <br>
+                    #27- 01 Peninsula plaza, Singapore <br>
+                    179098 <br>
+                    Phone: 0065 68495467 <br>
+                    E Mail Address : sreekanth@aitekltd.com. <br>
+                    GST Registration No: 201304790R <br>
+                </td>
+                <td><div class="justify-content-end d-flex me-5 mb-1 image"><img src="./logo.jpeg"></div></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>&nbsp;&nbsp;Invoice No: <span id="invoice"></span><br>
+                    &nbsp;&nbsp;Date: <span id="date"></span><br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100 p-2">
+            <tr >
+                <td class="p-1"><b>Invoice To:</b><br>
+                    INFOSYS SINGAPORE PTE. LTD<br>
+                    9 Temasek Boulevard, #43-01 Suntec <br>
+                    Tower 2, Singapore 038989.. <br>
+                </td>
+            </tr>
+            <tr>
+                <td><b>Period: </b><span id="period"></span></td>
+            </tr>
+            <tr class="text-light">
+                <td>--</td>
+            </tr>
+            <tr>
+                <td><b>Consulting Services: </b> Thelma</td>
+            </tr>
+            <tr>
+                <td>Note: The below table is for reference purpose only as per client's finance request</td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr class="bg-primary">
+                <td><b>Quantity</b>&nbsp;&nbsp;</td>
+                <td><b>Rate per Day in MYR</b>&nbsp;&nbsp;</td>
+                <td><b>Amount in MYR</b>&nbsp;&nbsp;</td>
+                <td><b>GST</b>&nbsp;&nbsp;</td>
+                <td><b>Total Amount in MYR</b>&nbsp;&nbsp;</td>
+            </tr>
+            <tr>
+                <td><span id="days"></span></td>
+                <TD id="perDay"></TD>
+                <td id="amountMYR"></td>
+                <td id="gstMYR"></td>
+                <td><span id="totalAmountMYR"></span></td>
+            </tr>
+            <tr class="bg-primary">
+                <td>--</td>
+                <td><b>Actual value in SGD</b></td>
+                <td><b>Rate in SGD/Day</b></td>
+                <td><b>GST</b></td>
+                <td><b>Amount in SGD</b></td>
+            </tr>
+            <tr>
+                <td>--</td>
+                <td>--</td>
+                <td id="sgd/day"></td>
+                <td><span id="gst"></span>%</td>
+                <td><span id="amountSGD"></span></td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="p-1">Please remit the total including GST amount to.<br>
+                    Account No: 647352756001 <br>
+                    Bank: OVERSEA-CHINESE BANKING CORPORATION LIMITED <br>
+                    Account Name: AITEK SERVICES PTE LTD <br>
+                    SWIFT Code: OCBCSGSG <br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="push">Sub Total: <span id="subTotal"></span> <br>
+                    GST Total: <span id="gstAmount"></span><br>
+                    Total: <span id="totalAmount"></span>
+                    <br>
+                    <br>
+                        <b>Balance Due:</b> <span id="balDue"></span>
+                </td>
+            </tr>
+        </table>
+        <h6><b>GST SUMMARY IN SGD</b></h6>
+        <table class="table-bordered w-100">
+            <tr class="bg-primary text-center">
+                <td><b>Rate</b></td>
+                <td><b>GST Amount</b></td>
+                <td><b>Net Amount</b></td>
+            </tr>
+            <tr class="text-center">
+                <td>GST@<span id="gstLower"></span>%</td>
+                <td><span id="gstAmountLower"></span></td>
+                <td><span id="totalAmountLower"></span></td>
+            </tr>
+        </table>
+        <h5 class="text-center p-2"><b>THANK YOU FOR THE BUSINESS</b></h5>
+    </form>
+</body>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const invoiceNumber = params.get("invoiceNumber");
+    const date = params.get("date");
+    const servicePeriod = params.get("servicePeriod");
+    const gst = params.get("gst");
+    const amount = params.get("amount");
+    const days = params.get("days");
+    const forex = params.get('forex');
+    const sgdDay = params.get("sgd/day");
+/*--------------------------------------------DECODING THE EXPORTED VALUES-----------------------------------------*/
+    const decinvoiceNumber = decodeURIComponent(invoiceNumber);
+    const decdate = decodeURIComponent(date);
+    const decservicePeriod = decodeURIComponent(servicePeriod);
+    const decgst = decodeURIComponent(gst);
+    const decamount = decodeURIComponent(amount);
+    const decdays = decodeURIComponent(days);
+    const decforex = decodeURIComponent(forex);
+    const decsgdDay = decodeURIComponent(sgdDay);
+/*-----------------------------------------------------Math---------------------------------------------------------*/
+    let amountSGD = (parseFloat(decsgdDay)*parseFloat(days)).toFixed(2);    
+    let basicAmount = parseFloat(decdays*decamount).toFixed(2);
+    let gstAmount = parseFloat(decgst/100*basicAmount).toFixed(2);
+    let totalAmount = (parseFloat(gstAmount)+parseFloat(basicAmount)).toFixed(2);
+    let sgd = (parseFloat(totalAmount)/parseFloat(decforex)).toFixed(2);
+    let sgdGST = (parseFloat(amountSGD/100)*parseFloat(decgst)).toFixed(2);
+    let totalSGD = (parseFloat(amountSGD)+parseFloat(sgdGST)).toFixed(2);
+/*-------------------------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------Printing--------------------------------------------------------*/
+    document.getElementById("invoice").textContent = decinvoiceNumber;
+    document.getElementById("date").textContent = decdate;
+    document.getElementById("period").textContent = decservicePeriod;
+    document.getElementById("days").textContent = decdays;
+    document.getElementById("gst").textContent = decgst;
+    document.getElementById("perDay").textContent = decamount;
+    document.getElementById("sgd/day").textContent = decsgdDay;
+    document.getElementById("amountMYR").textContent = basicAmount;
+    document.getElementById("gstMYR").textContent = gstAmount;
+    document.getElementById("totalAmountMYR").textContent = totalAmount;
+    document.getElementById("amountSGD").textContent = amountSGD;
+    document.getElementById("subTotal").textContent = amountSGD;
+    document.getElementById("gstAmount").textContent = sgdGST;
+    document.getElementById("totalAmount").textContent = totalSGD;
+    document.getElementById("balDue").textContent = totalSGD;
+    document.getElementById("gstLower").textContent = decgst;
+    document.getElementById("gstAmountLower").textContent = sgdGST;
+    document.getElementById("totalAmountLower").textContent = amountSGD;
+/*--------------------------------------------------------------------------------------------------------------------*/
+</script>
+</html>

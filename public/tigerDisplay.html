@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .image{
+            margin-top: 10px; 
+        }
+        .gap{
+            margin-top: -40px;
+        }
+        .push{
+            padding-left: 75%;
+        }
+    </style>
+</head>
+<body>
+    <div class="justify-content-center d-flex h2"><i>TAX INVOICE</i></div>
+    <form>
+        <table class="table-bordered w-100 p-2">
+            <tr>
+                <td class="p-1"><b>Company Name: AITEK PVK IT SERVICES LLC</b><br>
+                    100 North Howard Street, Suite W Spokane,<br>
+                    WA 99201 <br>
+                    Email: contact@aitekltd.com <br>
+                    UBI Number: 605 390 262 <br>
+                </td>
+                <td><div class="justify-content-end d-flex me-5 mb-1 image"><img src="./logo.jpeg"></div></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>&nbsp;&nbsp;Invoice No: <span id="invoice"></span><br>
+                    &nbsp;&nbsp;Date: <span id="date"></span><br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr >
+                <td class="p-1"><b>Invoice To:</b><br>
+                    KGTiger Corporation<br>
+                    112 Brownera Way, Philadelphia, PA <br>
+                    19085-2101<br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr class="bg-primary">
+                <td><b>Project Code</b>&nbsp;&nbsp;</td>
+                <td><b>Activity:</b>&nbsp;&nbsp;</td>
+                <td><b>Amount</b>&nbsp;&nbsp;</td>
+            </tr>
+            <tr>
+                <td><span id="projectCode"></span></td>
+                <td id="activity"></td>
+                <td><span id="amount"></span></td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="p-1">Account name: AITEK PVK IT SERVICES LLC<br>
+                    Account No.202480225521 <br>
+                    Type of account: Checking <br>
+                    ABA Route Number: 091311229<br>
+                    Bank name: Choice Financial Group<br>
+                    Bank address: 4501 23rd Avenue S <br>
+                    Fargo, ND 58104 <br>
+                    SWIFT: CHFGUS44021 <br>
+                    Beneficiary address: 100 North Howard Street, Suite W Spokane, WA 99201 USA <br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="push">Sub Total: <span id="subTotal"></span> <br> <br>
+                Balance Due: <span id="balanceDue"></span>
+                </td>
+            </tr>
+        </table>
+        <h5 class="text-center p-2"><b>THANK YOU FOR THE BUSINESS</b></h5>
+    </form>
+</body>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const invoiceNumber = params.get("invoiceNumber");
+    const date = params.get("date");
+    const amount = params.get("amount");
+    const activity = params.get('activity');
+    const projectCode = params.get("projectCode");
+/*--------------------------------------------DECODING THE IMPORTED VALUES-----------------------------------------*/
+    const decinvoiceNumber = decodeURIComponent(invoiceNumber);
+    const decdate = decodeURIComponent(date);
+    const decamount = decodeURIComponent(amount);
+    const decActivity = decodeURIComponent(activity);
+    const decprojectCode = decodeURIComponent(projectCode);
+/*---------------------------------------------------Printing--------------------------------------------------------*/
+    document.getElementById("invoice").textContent = decinvoiceNumber;
+    document.getElementById("date").textContent = decdate;
+    document.getElementById("amount").textContent = parseFloat(decamount).toFixed(2);
+    document.getElementById('activity').textContent = decActivity;
+    document.getElementById('projectCode').textContent = decprojectCode;
+    document.getElementById("subTotal").textContent = parseFloat(decamount).toFixed(2);
+    document.getElementById('balanceDue').textContent = parseFloat(decamount).toFixed(2);
+/*--------------------------------------------------------------------------------------------------------------------*/
+</script>
+</html>

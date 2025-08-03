@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Google Drive Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding: 30px;
+    }
+
+    .folder, .file {
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .folder:hover {
+      background-color: #61f38d;
+      
+    }
+
+    .file:hover {
+      background-color: #f1f3f5;
+      
+    }
+
+    .card-header {
+      font-weight: bold;
+    }
+
+    .file a {
+      margin-left: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold text-primary">📁 Google Drive Explorer</h1>
+      <p class="lead text-muted">Click on a folder to view its files. View or download files with ease.</p>
+    </div>
+
+    <!-- Folders Section -->
+    <div class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">Available Folders</div>
+        <div class="card-body" id="folders" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+      </div>
+    </div>
+
+    <!-- Files Section -->
+    <div>
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">Files in Selected Folder</div>
+        <div class="card-body" id="files">
+          <p class="text-muted">No folder selected.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load all folders from Drive
+    async function loadFolders() {
+      const res = await fetch('/folders');
+      const folders = await res.json();
+      const foldersDiv = document.getElementById('folders');
+      foldersDiv.innerHTML = '';
+
+      folders.forEach(folder => {
+        const folderBtn = document.createElement('button');
+        folderBtn.className = 'btn btn-outline-primary folder';
+        folderBtn.textContent = `📁 ${folder.name}`;
+        folderBtn.onclick = () => loadFiles(folder.id, folder.name);
+        foldersDiv.appendChild(folderBtn);
+      });
+    }
+
+    // Load files inside a selected folder
+    async function loadFiles(folderId, folderName) {
+      const res = await fetch(`/folders/${folderId}/files`);
+      const files = await res.json();
+      const filesDiv = document.getElementById('files');
+
+      if (files.length === 0) {
+        filesDiv.innerHTML = `<p class="text-muted">No files found in "<strong>${folderName}</strong>".</p>`;
+        return;
+      }
+
+      filesDiv.innerHTML = '';
+      const title = document.createElement('h5');
+      title.innerHTML = `📂 Files in "<strong>${folderName}</strong>":`;
+      filesDiv.appendChild(title);
+
+      files.forEach(file => {
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'file p-2 border rounded my-2 bg-light';
+        fileDiv.innerHTML = `
+          📄 <strong>${file.name}</strong>
+          <a href="${file.webViewLink}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+          <a href="/download/${file.id}" class="btn btn-sm btn-outline-success">Download</a>
+        `;
+        filesDiv.appendChild(fileDiv);
+      });
+    }
+
+    // Initial load
+    loadFolders();
+  </script>
+</body>
+</html>

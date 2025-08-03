@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .image{
+            margin-top: 10px; 
+        }
+        .gap{
+            margin-top: -40px;
+        }
+        .push{
+            padding-left: 75%;
+        }
+    </style>
+</head>
+<body>
+    <div class="justify-content-center d-flex h2"><i>TAX INVOICE</i></div>
+    <form>
+        <table class="table-bordered w-100 p-2">
+            <tr>
+                <td class="p-1"><b>AITEK PVK IT SERVICES LLC</b><br>
+                    100 North Howard Street, Suite W Spokane, <br>
+                    WA 99201 <br>
+                    Email: contact@aitekltd.com <br>
+                    UBI Number: 605 390 262 <br>
+                </td>
+                <td><div class="justify-content-end d-flex me-5 mb-1 image"><img src="./logo.jpeg"></div></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Invoice No: <span id="invoice"></span><br>
+                    Date: <span id="date"></span><br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr >
+                <td class="p-1"><b>Invoice To:</b><br>
+                    RIZING SDN BHD <br>
+                    (1142727-A), Unit 28.02, Menara LGB, No. 1, <br>
+                    Jalan Wan Kadir <br>
+                    Taman Tun Dr Ismail, 60000 Kuala Lumpur
+                </td>
+            </tr>
+            <tr>
+                <td><b>Period: </b><span id="period"></span></td>
+            </tr>
+            <tr class="text-light">
+                <td>--</td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr class="bg-primary">
+                <td><b>Activity-<span id="activity"></span></b></td>
+                <td><b>Quantity</b>&nbsp;&nbsp;</td>
+                <td><b>Rate in USD/DAY</b>&nbsp;&nbsp;</td>
+                <td><b>Amount in USD</b>&nbsp;&nbsp;</td>
+            </tr>
+            <tr>
+                <td><span id="name"></span></td>
+                <td id="quantity"></td>
+                <td id="amount"></td>
+                <td><span id="amountUSD"></span></td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="p-1">Account name: AITEK PVK IT SERVICES LLC <br>
+                    Account No.202480225521 <br>
+                    Type of account: Checking <br>
+                    ABA Route Number: 091311229 <br>
+                    Bank name: Choice Financial Group <br>
+                    Bank address: 4501 23rd Avenue S <br>
+                    Fargo, ND 58104 <br>
+                    SWIFT: CHFGUS44021 <br>
+                    Beneficiary address: 100 North Howard Street, Suite W Spokane, WA 99201 USA <br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="push">Sub Total: <span id="subTotal"></span> <br>
+                    Total: <span id="totalAmount"></span>
+                    <br>
+                    <br>
+                     <b>Balance Due:</b> <span id="balDue"></span>
+                </td>
+            </tr>
+        </table>
+        <h5 class="text-center p-2"><b>THANK YOU FOR THE BUSINESS</b></h5>
+    </form>
+</body>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const invoiceNumber = params.get("invoiceNumber");
+    const date = params.get("date");
+    const servicePeriod = params.get("servicePeriod");
+    const amount = params.get("amount");
+    const name = params.get("name");
+    const activity = params.get("activity");
+    const quantity = params.get("quantity");
+/*--------------------------------------------DECODING THE EXPORTED VALUES-----------------------------------------*/
+    const decinvoiceNumber = decodeURIComponent(invoiceNumber);
+    const decdate = decodeURIComponent(date);
+    const decservicePeriod = decodeURIComponent(servicePeriod);
+    const decamount = decodeURIComponent(amount);
+    const decname = decodeURIComponent(name);
+    const decactivity = decodeURIComponent(activity);
+    const decquantity = decodeURIComponent(quantity);
+/*-----------------------------------------------------Math---------------------------------------------------------*/
+    let subTotal = (parseFloat(decamount)*parseFloat(decquantity)).toFixed(2);
+/*-------------------------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------Printing--------------------------------------------------------*/
+    document.getElementById("invoice").textContent = decinvoiceNumber;
+    document.getElementById("date").textContent = decdate;
+    document.getElementById("period").textContent = decservicePeriod;
+    document.getElementById("activity").textContent = decactivity;
+    document.getElementById("name").textContent = decname;
+    document.getElementById("quantity").textContent = quantity;
+    document.getElementById("amount").textContent = decamount;
+    document.getElementById("subTotal").textContent = subTotal;
+    document.getElementById("amountUSD").textContent = subTotal;
+    document.getElementById("totalAmount").textContent = subTotal;
+    document.getElementById("balDue").textContent = subTotal;
+/*--------------------------------------------------------------------------------------------------------------------*/
+</script>
+</html>

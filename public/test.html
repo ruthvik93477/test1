@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Alignment</title>
+</head>
+<style>
+    table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.end-align {
+    text-align: left; /* Align text to the start */
+    position: absolute; /* Remove it from the normal flow */
+    right: 0; /* Position it at the end */
+    width: auto; /* Adjust width as needed */
+}
+
+</style>
+<body>
+    <table>
+        <tr>
+            <td class="end-align">End Aligned Text</td>
+        </tr>
+    </table>
+</body>
+</html>
