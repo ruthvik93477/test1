@@ -20,7 +20,8 @@
     "multer": "^2.0.2",
     "nodemon": "^3.0.2",
     "path": "^0.12.7",
-    "postcss": "^8.4.40"
+    "postcss": "^8.4.40",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.6"
