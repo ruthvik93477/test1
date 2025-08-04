@@ -62,28 +62,68 @@
 <body>
   <div class="upload-container">
     <h2>📤 Upload your resumes here</h2>
-    <form id="uploadForm" enctype="multipart/form-data" action="/uploadFile" method="post">
+    <form id="uploadForm" enctype="multipart/form-data" method="post">
       <input type="file" name="files" class="form-control mb-3" multiple required />
-      <button type="submit" class="btn btn-upload">Upload Files</button>
+      <button type="submit" class="btn btn-upload" onclick="text1()">Upload Files</button>
+      <span id="wait"></span>
     </form>
   </div>
 
+  <!-- ✅ Thank You Modal -->
+  <div class="modal fade" id="thankYouModal" tabindex="-1" aria-labelledby="thankYouLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="thankYouLabel">🎉 Thank You!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Your files were successfully uploaded. You can close the tab</p>
+          <button class="btn btn-success" onclick="closeTab()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    const pathSegments = window.location.pathname.split('/');
+    const linkId = pathSegments[pathSegments.length - 1];
+    const folderName = pathSegments[pathSegments.length - 2];
+
+    const form = document.getElementById('uploadForm');
+    form.action = `/upload/${folderName}/${linkId}`;
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const formData = new FormData(e.target);
+      const formData = new FormData(form);
 
       try {
-        const response = await fetch('/uploadFile', {
+        const response = await fetch(form.action, {
           method: 'POST',
           body: formData
         });
         const result = await response.json();
-        alert(result.message);
+        document.getElementById('wait').innerText = '';
+
+        if (response.ok) {
+          const thankYouModal = new bootstrap.Modal(document.getElementById('thankYouModal'));
+          thankYouModal.show();
+        } else {
+          alert(result.message || "Upload failed.");
+        }
       } catch (error) {
+        console.error('Upload error:', error);
         alert("Upload failed. Please try again.");
       }
     });
+
+    function text1() {
+      document.getElementById('wait').innerText = "Please wait until popup appears.........";
+    }
+
+    function closeTab() {
+      window.location.reload();
+    }
   </script>
 </body>
 </html>
