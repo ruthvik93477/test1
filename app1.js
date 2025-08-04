@@ -970,76 +970,57 @@ app.get('/createFolder', authenticate,(req, res) => {
 let folderId = '';
 
 
-/*app.post('/createFolder', upload.none(), async (req, res) => {
-  try {
-    folderName = req.body.postName; // Now it will be available
-    folderId = await getOrCreateFolderId(folderName);
-    res.json({ message: `✅ Folder '${folderName}' created or already exists.` });
-  } catch (error) {
-    console.error('Folder creation error:', error.message);
-    res.status(500).json({ message: '❌ Failed to create folder.' });
-  }
-});
+const { v4: uuidv4 } = require('uuid'); // Install using `npm install uuid`
+const { addFolderMapping, getFolderByLink } = require('./folderStore.js');
 
-
-// === Upload Route ===
-
-app.post('/uploadFile', upload.fields([{ name: 'files', maxCount: 10 }]), async (req, res) => {
-  try {
-    if (!folderId) {
-      return res.status(400).json({ message: '❌ No folder has been created yet.' });
-    }
-
-    const uploadedFiles = req.files['files'] || [];
-
-    for (const file of uploadedFiles) {
-      await uploadFileToFolder(file.path, file.originalname, file.mimetype, folderId);
-      fs.unlinkSync(file.path); // remove file from local disk
-    }
-
-    res.json({ message: `✅ Files uploaded to folder '${folderName}'.` });
-  } catch (error) {
-    console.error('Upload error:', error.message);
-    res.status(500).json({ message: '❌ Upload failed.' });
-  }
-});*/
-
-const { getStoredFolder1, saveFolder1 } = require('./folderStore.js'); // adjust path if in subfolder
-
-let currentFolder = getStoredFolder1(); // Try loading from file
-
-folderId = currentFolder?.folderId || '';
-folderName = currentFolder?.folderName || '';
-
-
-app.post('/createFolder', authenticate,upload.none(), async (req, res) => {
+app.post('/createFolder', authenticate, upload.none(), async (req, res) => {
   try {
     folderName = req.body.postName;
     folderId = await getOrCreateFolderId(folderName);
 
-    saveFolder1(folderName, folderId); // save to disk
-    res.json({ message: `✅ Folder '${folderName}' created or already exists.` });
+    const linkId = uuidv4(); // unique identifier
+    addFolderMapping(linkId, folderName, folderId); // Save to file
+
+    const uploadLink = `${req.protocol}://${req.get('host')}/upload/${folderName}/${linkId}`;
+    console.log(uploadLink);
+    res.json({ message: `✅ Folder '${folderName}' is ready.`, uploadLink });
+    
   } catch (error) {
     console.error('Folder creation error:', error.message);
     res.status(500).json({ message: '❌ Failed to create folder.' });
   }
 });
 
+app.get('/upload/:folderName/:linkId', async (req, res) => {
+  const folder = getFolderByLink(req.params.linkId);
+  if (!folder) {
+    return res.status(404).send('❌ Invalid or expired upload link.');
+  }
 
-app.post('/uploadFile', upload.fields([{ name: 'files', maxCount: 50 }]), async (req, res) => {
+  res.sendFile(__dirname + '/public/fileUpload.html');
+});
+
+
+app.post('/upload/:folderName/:linkId', upload.fields([{ name: 'files', maxCount: 50 }]), async (req, res) => {
   try {
-    if (!folderId) {
-      return res.status(400).json({ message: '❌ No folder has been created yet.' });
+    const linkId = req.params.linkId;
+    console.log("Received linkId:", linkId);
+
+    const folder = getFolderByLink(linkId);
+    console.log("Resolved folder:", folder);
+
+    if (!folder) {
+      return res.status(400).json({ message: '❌ Invalid upload link.' });
     }
 
     const uploadedFiles = req.files['files'] || [];
 
     for (const file of uploadedFiles) {
-      await uploadFileToFolder(file.path, file.originalname, file.mimetype, folderId);
+      await uploadFileToFolder(file.path, file.originalname, file.mimetype, folder.folderId);
       fs.unlinkSync(file.path);
     }
 
-    res.json({ message: `✅ Files uploaded to folder '${folderName}'.` });
+    res.json({ message: `✅ Files uploaded to folder '${folder.folderName}'.` });
   } catch (error) {
     console.error('Upload error:', error.message);
     res.status(500).json({ message: '❌ Upload failed.' });
