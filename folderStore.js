@@ -1,26 +1,28 @@
 // folderStore.js
 const fs = require('fs');
 const path = require('path');
+const filePath = path.join(__dirname, 'folderMap.json');
 
-const dataPath = path.join(__dirname, 'folderData.json');
-
-// Load from JSON file
-function getStoredFolder1() {
-  if (fs.existsSync(dataPath)) {
-    const data = fs.readFileSync(dataPath, 'utf8');
-    try {
-      return JSON.parse(data);
-    } catch (e) {
-      return null;
-    }
+function loadFolderMap() {
+  if (fs.existsSync(filePath)) {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   }
-  return null;
+  return {};
 }
 
-// Save to JSON file
-function saveFolder1(folderName, folderId) {
-  const data = { folderName, folderId };
-  fs.writeFileSync(dataPath, JSON.stringify(data));
+function saveFolderMap(map) {
+  fs.writeFileSync(filePath, JSON.stringify(map, null, 2));
 }
 
-module.exports = { getStoredFolder1, saveFolder1 };
+function addFolderMapping(linkId, folderName, folderId) {
+  const map = loadFolderMap();
+  map[linkId] = { folderName, folderId };
+  saveFolderMap(map);
+}
+
+function getFolderByLink(linkId) {
+  const map = loadFolderMap();
+  return map[linkId];
+}
+
+module.exports = { addFolderMapping, getFolderByLink };
