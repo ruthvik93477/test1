@@ -76,6 +76,36 @@
     .icon {
       margin-right: 6px;
     }
+
+    .link-box {
+      margin-top: 15px;
+      background: #f1f8e9;
+      padding: 15px;
+      border: 1px dashed #aed581;
+      border-radius: 10px;
+      word-break: break-word;
+    }
+
+    .copy-button {
+      margin-top: 10px;
+      background-color: #81c784;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background-color: #66bb6a;
+    }
+
+    .copied-msg {
+      color: green;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -90,9 +120,18 @@
         </div>
         <div class="card-body">
           <input type="text" id="postName" name="postName" class="form-control mb-4" placeholder="Enter posting name..." required />
-          <button type="submit" class="btn btn-warning w-100">
-            <span class="icon">➕</span> Create Folder
+          <button type="submit" class="btn btn-warning w-100" onclick="text()">
+            <span class="icon">➕</span> Create Posting
           </button>
+          <span id="wait"></span>
+
+          <!-- Link Display Box -->
+          <div id="linkSection" class="link-box mt-4" style="display: none;">
+            <div><strong>Shareable Upload Link:</strong></div>
+            <div id="uploadLink" class="text-primary mt-2"></div>
+            <button type="button" class="copy-button" onclick="copyLink()">📋 Copy Link</button>
+            <div class="copied-msg" id="copiedMsg">✅ Link copied to clipboard!</div>
+          </div>
         </div>
       </div>
 
@@ -117,14 +156,12 @@
     document.getElementById('createForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const folderName = document.getElementById('postName').value.trim();
-
       if (!folderName) {
         alert("Please enter a valid posting name.");
         return;
       }
 
       const formData = new FormData(e.target);
-
       try {
         const response = await fetch('/createFolder', {
           method: 'POST',
@@ -133,10 +170,31 @@
 
         const result = await response.json();
         alert(result.message);
+        document.getElementById('wait').innerText = '';
+
+        // Show the upload link section
+        if (result.uploadLink) {
+          document.getElementById('linkSection').style.display = 'block';
+          document.getElementById('uploadLink').innerText = result.uploadLink;
+        }
       } catch (error) {
         alert("An error occurred. Please try again.");
       }
     });
+
+    function text() {
+      const waitMsg = "Please wait until popup appears.........";
+      document.getElementById('wait').innerText = waitMsg;
+    }
+
+    function copyLink() {
+      const link = document.getElementById('uploadLink').innerText;
+      navigator.clipboard.writeText(link).then(() => {
+        const msg = document.getElementById('copiedMsg');
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 2000);
+      });
+    }
   </script>
 </body>
 </html>
