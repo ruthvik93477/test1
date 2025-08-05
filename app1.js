@@ -914,7 +914,7 @@ app.use(express.urlencoded({ extended: true }));
 // === Multer Setup (store uploaded files in /uploads) ===
 const upload = multer({ dest: 'uploads/' });
 
-let folderName = 'MyDriveFolder';
+let folderNam = 'MyDriveFolder';
 
 // === Helper: Create or get folder ===
 async function getOrCreateFolderId(folderName) {
@@ -957,7 +957,6 @@ async function uploadFileToFolder(localPath, originalName, mimeType, folderId) {
 
 // === Serve HTML frontend ===
 app.get('/uploadFile', (req, res) => {
-  //res.sendFile(path.join(__dirname, 'fileUpload.html'));
   res.sendFile(__dirname+'/public/fileUpload.html')
 });
 
@@ -970,13 +969,24 @@ app.get('/createFolder', authenticate,(req, res) => {
 let folderId = '';
 
 
-const { v4: uuidv4 } = require('uuid'); // Install using `npm install uuid`
+const { v4: uuidv4 } = require('uuid'); 
 const { addFolderMapping, getFolderByLink } = require('./folderStore.js');
 
+let folderName = '';
 app.post('/createFolder', authenticate, upload.none(), async (req, res) => {
   try {
-    folderName = req.body.postName;
-    folderId = await getOrCreateFolderId(folderName);
+    folderNam = req.body.postName;
+
+      for(let i=0;i<folderNam.length;i++){
+        if(folderNam[i] === ' '){
+          folderName += '_';
+        }
+        else{
+          folderName+=folderNam[i];
+        }
+      }
+      console.log(folderName);
+      folderId = await getOrCreateFolderId(folderName);
 
     const linkId = uuidv4(); // unique identifier
     addFolderMapping(linkId, folderName, folderId); // Save to file
@@ -984,6 +994,7 @@ app.post('/createFolder', authenticate, upload.none(), async (req, res) => {
     const uploadLink = `${req.protocol}://${req.get('host')}/upload/${folderName}/${linkId}`;
     console.log(uploadLink);
     res.json({ message: `✅ Folder '${folderName}' is ready.`, uploadLink });
+    folderName = ''; // Reset folderName for next use
     
   } catch (error) {
     console.error('Folder creation error:', error.message);
@@ -1004,10 +1015,8 @@ app.get('/upload/:folderName/:linkId', async (req, res) => {
 app.post('/upload/:folderName/:linkId', upload.fields([{ name: 'files', maxCount: 50 }]), async (req, res) => {
   try {
     const linkId = req.params.linkId;
-    console.log("Received linkId:", linkId);
 
     const folder = getFolderByLink(linkId);
-    console.log("Resolved folder:", folder);
 
     if (!folder) {
       return res.status(400).json({ message: '❌ Invalid upload link.' });
