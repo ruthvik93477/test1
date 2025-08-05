@@ -155,7 +155,16 @@
   <script>
     document.getElementById('createForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const folderName = document.getElementById('postName').value.trim();
+      let folderNam = document.getElementById('postName').value.trim();
+      let folderName = '';
+      for(let i=0;i<folderNam.length;i++){
+        if(folderNam[i] === ' '){
+          folderName += '_';
+        }
+        else{
+          folderName+=folderNam[i];
+        }
+      }
       if (!folderName) {
         alert("Please enter a valid posting name.");
         return;
