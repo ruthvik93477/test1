@@ -26,9 +26,25 @@ app.use(session({
   }));
   const conn = process.env.MONGO_URL;
   mongoose.connect(conn);
-  const userName = process.env.USER_NAME;
+  const userName = process.env.user_name;
   const pass = process.env.PASSWORD;
   const passStaff = process.env.PASSWORD_STAFF;
+  const us1 = process.env.usr1;
+  const pw1 = process.env.pwd1;
+  const us2 = process.env.usr2;
+  const pw2 = process.env.pwd2;
+  const us3 = process.env.usr3;
+  const pw3 = process.env.pwd3;
+  const us4 = process.env.usr4;
+  const pw4 = process.env.pwd4;
+  const us5 = process.env.usr5;
+  const pw5 = process.env.pwd5;
+  const us6 = process.env.usr6;
+  const pw6 = process.env.pwd6;
+  const us7 = process.env.usr7;
+  const pw7 = process.env.pwd7;
+  const us8 = process.env.usr8;
+  const pw8 = process.env.pwd8;
   // Authentication middleware
 
   const authenticate = (req, res, next) => {
@@ -48,7 +64,11 @@ app.use(session({
     const { username, password } = req.session;
     const { usernameStaff, passwordStaff } = req.session;
     const isAuthenticated = username === userName && password === pass;
-    const isAuthenticatedStaff = usernameStaff === userName && passwordStaff === passStaff;
+    const isAuthenticatedStaff = (usernameStaff === userName && passwordStaff === passStaff)||(usernameStaff===us1&&passwordStaff===pw1)
+                                  ||(usernameStaff===us2&&passwordStaff===pw2)||(usernameStaff===us3&&passwordStaff===pw3)
+                                  ||(usernameStaff===us4&&passwordStaff===pw4)||(usernameStaff===us5&&passwordStaff===pw5)
+                                  ||(usernameStaff===us6&&passwordStaff===pw6)||(usernameStaff===us7&&passwordStaff===pw7)
+                                  ||(usernameStaff===us8&&passwordStaff===pw8);
     if (isAuthenticated|| isAuthenticatedStaff) {
       next();
     } else {
@@ -352,12 +372,45 @@ app.post('/landing',(req, res) => {
 
   app.post('/landingLeave',(req, res) => {
     const { usernameStaff, passwordStaff } = req.body;
-  
+    res.render('staffLanding', { user: usernameStaff, pass: passwordStaff });
     if (usernameStaff === userName && passwordStaff === passStaff) {
       req.session.usernameStaff = usernameStaff;
       req.session.passwordStaff = passwordStaff;
       res.redirect('/landingLeave');
-    } else {
+    } else if (usernameStaff === us1 && passwordStaff === pw1) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.render('/staffLanding');
+    } else if (usernameStaff === us2 && passwordStaff === pw2) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.redirect('/landingLeave');
+    } else if (usernameStaff === us3 && passwordStaff === pw3) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.redirect('/landingLeave');
+    } else if (usernameStaff === us4 && passwordStaff === pw4) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.redirect('/landingLeave');
+    } else if (usernameStaff === us5 && passwordStaff === pw5) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.redirect('/landingLeave');
+    } else if (usernameStaff === us6 && passwordStaff === pw6) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.redirect('/landingLeave');
+    } else if (usernameStaff === us7 && passwordStaff === pw7) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.redirect('/landingLeave');
+    } else if (usernameStaff === us8 && passwordStaff === pw8) {
+      req.session.usernameStaff = usernameStaff;
+      req.session.passwordStaff = passwordStaff;
+      res.redirect('/landingLeave');
+    } 
+    else {
       res.sendFile(__dirname + "/public/invalid.html")
     }
   });
@@ -916,29 +969,45 @@ const upload = multer({ dest: 'uploads/' });
 
 let folderNam = 'MyDriveFolder';
 
-// === Helper: Create or get folder ===
-async function getOrCreateFolderId(folderName) {
+let allFoldersParentId = '';
+
+async function ensureAllFoldersParentExists() {
+  allFoldersParentId = await getOrCreateFolderId('all_folders');
+}
+
+ensureAllFoldersParentExists().then(() => {
+  console.log('✅ all_folders parent folder is ready.');
+});
+
+
+async function getOrCreateFolderId(folderName, parentFolderId = null) {
+  const query = parentFolderId
+    ? `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and '${parentFolderId}' in parents and trashed=false`
+    : `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`;
+
   const res0 = await drive.files.list({
-      q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
-      fields: 'files(id, name)',
-      spaces: 'drive',
-    });
+    q: query,
+    fields: 'files(id, name)',
+    spaces: 'drive',
+  });
 
-    if (res0.data.files.length > 0) {
-      console.log(`Folder '${folderName}' already exists.`);
-      return res0.data.files[0].id;
-    }
-
+  if (res0.data.files.length > 0) {
+    console.log(`Folder '${folderName}' already exists.`);
+    return res0.data.files[0].id;
+  }
 
   const createRes = await drive.files.create({
     requestBody: {
       name: folderName,
       mimeType: 'application/vnd.google-apps.folder',
+      parents: parentFolderId ? [parentFolderId] : [],
     },
     fields: 'id',
   });
+
   return createRes.data.id;
 }
+
 
 // === Helper: Upload file to Drive ===
 async function uploadFileToFolder(localPath, originalName, mimeType, folderId) {
@@ -985,14 +1054,14 @@ app.post('/createFolder', authenticate, upload.none(), async (req, res) => {
           folderName+=folderNam[i];
         }
       }
-      console.log(folderName);
-      folderId = await getOrCreateFolderId(folderName);
+      //folderId = await getOrCreateFolderId(folderName);
+      folderId = await getOrCreateFolderId(folderName, allFoldersParentId);
+
 
     const linkId = uuidv4(); // unique identifier
     addFolderMapping(linkId, folderName, folderId); // Save to file
 
     const uploadLink = `${req.protocol}://${req.get('host')}/upload/${folderName}/${linkId}`;
-    console.log(uploadLink);
     res.json({ message: `✅ Folder '${folderName}' is ready.`, uploadLink });
     folderName = ''; // Reset folderName for next use
     
@@ -1043,17 +1112,23 @@ app.get('/viewFiles', authenticate,(req, res) => {
   res.sendFile(__dirname+'/public/displayFiles.html');
 });
 
-app.get('/folders',authenticate, async (req, res) => {
+
+app.get('/folders', authenticate, async (req, res) => {
   try {
+    const parentId = allFoldersParentId;  // Get or create all_folders
+
     const response = await drive.files.list({
-      q: "mimeType='application/vnd.google-apps.folder'",
-      fields: 'files(id, name)'
+      q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name)',
     });
+
     res.json(response.data.files);
   } catch (error) {
+    console.error('Error listing subfolders:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // List files inside a folder
 app.get('/folders/:folderId/files', authenticate, async (req, res) => {
