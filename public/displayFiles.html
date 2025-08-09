@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Google Drive Explorer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="logo.jpeg" style="border-radius: 25px;">
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,36 +15,48 @@
       background-color: #f8f9fa;
       padding: 30px;
     }
-
     .folder, .file {
       transition: background-color 0.2s ease-in-out;
     }
-
     .folder:hover {
       background-color: #61f38d;
-      
     }
-
     .file:hover {
       background-color: #f1f3f5;
-      
     }
-
-    .card-header {
+    .shortlisted-btn {
+      background-color: orange !important;
+      color: white !important;
+    }
+    .shortlist-count {
+      font-size: 1rem;
       font-weight: bold;
+      color: #fff;
+      background: #ff6600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 5px;
     }
-
-    .file a {
-      margin-left: 15px;
+    .filters label {
+      margin-right: 15px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- Header -->
-    <div class="text-center mb-5">
-      <h1 class="display-5 fw-bold text-primary">📁 Google Drive Explorer</h1>
-      <p class="lead text-muted">Click on a folder to view its files. View or download files with ease.</p>
+    <div class="text-center mb-4">
+      <h1 class="display-5 fw-bold text-primary">
+        📁 Google Drive Explorer
+        <span class="shortlist-count" id="shortlistCount">0</span>
+      </h1>
+      <p class="lead text-muted">Browse folders, shortlist files, and keep track of them easily.</p>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filters mb-3 text-center">
+      <label><input type="checkbox" id="showShortlist"> Not Shortlisted</label>
+      <label><input type="checkbox" id="showShortlisted"> Shortlisted</label>
     </div>
 
     <!-- Folders Section -->
@@ -66,6 +79,42 @@
   </div>
 
   <script>
+    let shortlistedSet = new Set();
+    let currentFiles = [];
+    let currentFolderName = '';
+
+    // Update shortlist count in header
+    function updateShortlistCount() {
+      document.getElementById('shortlistCount').textContent = shortlistedSet.size;
+    }
+
+    // Fetch shortlisted IDs from server
+    async function fetchShortlist() {
+      const res = await fetch('/shortlist');
+      const ids = await res.json();
+      shortlistedSet = new Set(ids);
+      updateShortlistCount();
+    }
+
+    // Toggle shortlist for a file via backend
+    async function toggleShortlist(fileId, btn) {
+      const res = await fetch(`/shortlist/${fileId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const data = await res.json();
+      if (data.shortlisted) {
+        shortlistedSet.add(fileId);
+      } else {
+        shortlistedSet.delete(fileId);
+      }
+      updateShortlistButton(btn, data.shortlisted);
+      updateShortlistCount();
+    }
+
+    // Update button UI
+    function updateShortlistButton(btn, isShortlisted) {
+      btn.textContent = isShortlisted ? 'Shortlisted' : 'Shortlist';
+      btn.classList.toggle('shortlisted-btn', isShortlisted);
+    }
+
     // Load all folders from Drive
     async function loadFolders() {
       const res = await fetch('/folders');
@@ -82,36 +131,73 @@
       });
     }
 
-    // Load files inside a selected folder
+    // Load files in folder
     async function loadFiles(folderId, folderName) {
       const res = await fetch(`/folders/${folderId}/files`);
       const files = await res.json();
+      currentFiles = files;
+      currentFolderName = folderName;
+      renderFiles(files);
+    }
+
+    // Render files list with filters
+    function renderFiles(files) {
       const filesDiv = document.getElementById('files');
 
-      if (files.length === 0) {
-        filesDiv.innerHTML = `<p class="text-muted">No files found in "<strong>${folderName}</strong>".</p>`;
+      // Apply filters
+      const showShortlist = document.getElementById('showShortlist').checked;
+      const showShortlisted = document.getElementById('showShortlisted').checked;
+
+      let filteredFiles = files;
+      if (showShortlist) {
+        filteredFiles = filteredFiles.filter(file => !shortlistedSet.has(file.id));
+      }
+      if (showShortlisted) {
+        filteredFiles = filteredFiles.filter(file => shortlistedSet.has(file.id));
+      }
+
+      if (filteredFiles.length === 0) {
+        filesDiv.innerHTML = `<p class="text-muted">No files found in "<strong>${currentFolderName}</strong>".</p>`;
         return;
       }
 
-      filesDiv.innerHTML = '';
-      const title = document.createElement('h5');
-      title.innerHTML = `📂 Files in "<strong>${folderName}</strong>":`;
-      filesDiv.appendChild(title);
-
-      files.forEach(file => {
+      filesDiv.innerHTML = `<h5>📂 Files in "<strong>${currentFolderName}</strong>":</h5>`;
+      filteredFiles.forEach(file => {
         const fileDiv = document.createElement('div');
-        fileDiv.className = 'file p-2 border rounded my-2 bg-light';
-        fileDiv.innerHTML = `
-          📄 <strong>${file.name}</strong>
-          <a href="${file.webViewLink}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
-          <a href="/download/${file.id}" class="btn btn-sm btn-outline-success">Download</a>
+        fileDiv.className = 'file p-2 border rounded my-2 bg-light d-flex align-items-center justify-content-between';
+
+        const leftPart = document.createElement('div');
+        leftPart.innerHTML = `📄 <strong>${file.name}</strong>`;
+
+        const rightPart = document.createElement('div');
+        rightPart.innerHTML = `
+          <a href="${file.webViewLink}" target="_blank" class="btn btn-sm btn-outline-primary me-1">View</a>
+          <a href="/download/${file.id}" class="btn btn-sm btn-outline-success me-1">Download</a>
         `;
+
+        const shortlistBtn = document.createElement('button');
+        shortlistBtn.className = 'btn btn-sm btn-outline-warning';
+        shortlistBtn.onclick = () => toggleShortlist(file.id, shortlistBtn);
+        updateShortlistButton(shortlistBtn, shortlistedSet.has(file.id));
+
+        rightPart.appendChild(shortlistBtn);
+
+        fileDiv.appendChild(leftPart);
+        fileDiv.appendChild(rightPart);
+
         filesDiv.appendChild(fileDiv);
       });
     }
 
+    // Filter checkboxes
+    document.getElementById('showShortlist').addEventListener('change', () => renderFiles(currentFiles));
+    document.getElementById('showShortlisted').addEventListener('change', () => renderFiles(currentFiles));
+
     // Initial load
-    loadFolders();
+    (async () => {
+      await fetchShortlist();
+      loadFolders();
+    })();
   </script>
 </body>
 </html>
