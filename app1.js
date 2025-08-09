@@ -1163,3 +1163,42 @@ app.get('/download/:fileId', authenticate, async (req, res) => {
   }
 });
 
+
+////////////////////////////////////////////shortlisting logic////////////////////////////////////////////
+
+const shortlistFile = path.join(__dirname, 'shortlist.json');
+
+// Ensure file exists
+if (!fs.existsSync(shortlistFile)) {
+  fs.writeFileSync(shortlistFile, JSON.stringify([]));
+}
+
+// Utility to read shortlist
+function readShortlist() {
+  return JSON.parse(fs.readFileSync(shortlistFile, 'utf-8'));
+}
+
+// Utility to save shortlist
+function saveShortlist(data) {
+  fs.writeFileSync(shortlistFile, JSON.stringify(data, null, 2));
+}
+
+// Get shortlisted IDs
+app.get('/shortlist', (req, res) => {
+  res.json(readShortlist());
+});
+
+// Toggle shortlist for a file
+app.post('/shortlist/:fileId', express.json(), (req, res) => {
+  let shortlist = readShortlist();
+  const fileId = req.params.fileId;
+
+  if (shortlist.includes(fileId)) {
+    shortlist = shortlist.filter(id => id !== fileId);
+  } else {
+    shortlist.push(fileId);
+  }
+
+  saveShortlist(shortlist);
+  res.json({ success: true, shortlisted: shortlist.includes(fileId) });
+});
