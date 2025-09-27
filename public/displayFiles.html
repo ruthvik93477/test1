@@ -57,13 +57,15 @@
     <!-- Folders Section -->
     <div class="mb-4">
       <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">Available Folders</div>
+        <div class="card-header bg-primary text-white">Available Folders
+          <span><button class="btn btn-sm btn-outline-light mx-3" onclick="refresh()">Show folders</button></span>
+        </div>
         <div class="card-body" id="folders" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
       </div>
     </div>
 
     <!-- Files Section -->
-        <div>
+     <div>
       <div class="card shadow-sm">
         <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
           <span>Files in Selected Folder</span>
@@ -104,7 +106,9 @@
     let shortlistedSet = new Set();
     let currentFiles = [];
     let currentFolderName = '';
-
+    function refresh() {
+      location.reload();
+    }
     // Update shortlist count in header
     /*function updateShortlistCount() {
       document.getElementById('shortlistCount').textContent = shortlistedSet.size;
