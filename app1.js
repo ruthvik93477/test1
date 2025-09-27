@@ -35,16 +35,6 @@ app.use(session({
   const pw2 = process.env.pwd2;
   const us3 = process.env.usr3;
   const pw3 = process.env.pwd3;
-  const us4 = process.env.usr4;
-  const pw4 = process.env.pwd4;
-  const us5 = process.env.usr5;
-  const pw5 = process.env.pwd5;
-  const us6 = process.env.usr6;
-  const pw6 = process.env.pwd6;
-  const us7 = process.env.usr7;
-  const pw7 = process.env.pwd7;
-  const us8 = process.env.usr8;
-  const pw8 = process.env.pwd8;
   // Authentication middleware
 
   const authenticate = (req, res, next) => {
@@ -53,8 +43,6 @@ app.use(session({
     if (isAuthenticated) {
       next();
     } else {
-      //res.status(401).send('Unauthorized. Please log in.');
-      //res.status(401).sendFile(__dirname+'/public/unauth.html')
       let g = fs.readFileSync("public/unauth.html");
       res.status(404).send(g.toString());
     }
@@ -65,15 +53,10 @@ app.use(session({
     const { usernameStaff, passwordStaff } = req.session;
     const isAuthenticated = username === userName && password === pass;
     const isAuthenticatedStaff = (usernameStaff === userName && passwordStaff === passStaff)||(usernameStaff===us1&&passwordStaff===pw1)
-                                  ||(usernameStaff===us2&&passwordStaff===pw2)||(usernameStaff===us3&&passwordStaff===pw3)
-                                  ||(usernameStaff===us4&&passwordStaff===pw4)||(usernameStaff===us5&&passwordStaff===pw5)
-                                  ||(usernameStaff===us6&&passwordStaff===pw6)||(usernameStaff===us7&&passwordStaff===pw7)
-                                  ||(usernameStaff===us8&&passwordStaff===pw8);
+                                  ||(usernameStaff===us2&&passwordStaff===pw2)||(usernameStaff===us3&&passwordStaff===pw3);
     if (isAuthenticated|| isAuthenticatedStaff) {
       next();
     } else {
-      //res.status(401).send('Unauthorized. Please log in.');
-      //res.status(401).sendFile(__dirname+'/public/unauth.html')
       let g = fs.readFileSync("public/unauth.html");
       res.status(404).send(g.toString());
     }
@@ -356,6 +339,10 @@ app.get('/landing',authenticate, (req, res) => {
     res.sendFile(__dirname + '/public/landing.html');
 });
 
+app.get('/staffL',authenticateStaff, (req, res) => {
+  res.sendFile(__dirname + '/public/staffL.html');
+});
+
 app.post('/landing',(req, res) => {
     const { username, password } = req.body;
   
@@ -364,23 +351,22 @@ app.post('/landing',(req, res) => {
       req.session.password = password;
       res.redirect('/landing');
     } else {
-      /*let a5 = fs.readFileSync("/public/invalid.html");
-      res.status(401).send(a5.toString())*/
       res.sendFile(__dirname + "/public/invalid.html")
     }
   });
 
   app.post('/landingLeave',(req, res) => {
     const { usernameStaff, passwordStaff } = req.body;
-    res.render('staffLanding', { user: usernameStaff, pass: passwordStaff });
+    //res.render('staffLanding', { user: usernameStaff, pass: passwordStaff });
     if (usernameStaff === userName && passwordStaff === passStaff) {
       req.session.usernameStaff = usernameStaff;
       req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
+      console.log(usernameStaff);
+      res.redirect('/staffL');
     } else if (usernameStaff === us1 && passwordStaff === pw1) {
       req.session.usernameStaff = usernameStaff;
       req.session.passwordStaff = passwordStaff;
-      res.render('/staffLanding');
+      res.render('/landingLeave');
     } else if (usernameStaff === us2 && passwordStaff === pw2) {
       req.session.usernameStaff = usernameStaff;
       req.session.passwordStaff = passwordStaff;
@@ -753,9 +739,12 @@ const inputSchema2 = new mongoose.Schema({
   cn: String,
   clientName: String,
   name: String,
-  cf: Number,
   ml: Number,
   al: Number,
+  subconNames: String,
+  rates: Number,
+  ct: String,
+  remarks: String,
   jan: Number,
   feb: Number,
   mar: Number,
@@ -786,8 +775,12 @@ const inputSchema2 = new mongoose.Schema({
 
 const InputData2 = mongoose.model('Leave_Tracker', inputSchema2);
 
+app.get('/staffDashboard',authenticateStaff, (req, res) => {
+  res.sendFile(__dirname + '/public/staffDashboard.html');
+});
+
 app.get('/landingLeave',authenticateStaff, (req, res) => {
-res.sendFile(__dirname + '/public/landingLeave.html');
+  res.sendFile(__dirname + '/public/landingLeave.html');
 });
 
 // Upload.html route
@@ -799,16 +792,45 @@ app.get('/uploadLeave',authenticateStaff, (req, res) => {
 app.post('/updateDetailsLeave',authenticateStaff, async (req, res) => {
   const name = req.body.name;
   const jan = req.body.jan;
-  const { cn,clientName,year,cf,al,ml,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,jan_ml,feb_ml,mar_ml,apr_ml,may_ml,jun_ml,jul_ml,aug_ml,sep_ml,oct_ml,nov_ml,dec_ml } = req.body;
+  const { cn,clientName,subconNames,rates,remarks,ct,year,al,ml,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,jan_ml,feb_ml,mar_ml,apr_ml,may_ml,jun_ml,jul_ml,aug_ml,sep_ml,oct_ml,nov_ml,dec_ml } = req.body;
   let {aLeaves,mLeaves} = req.body;
+  console.log(aLeaves);
+  console.log(mLeaves);
+  if(al===""||isNaN(al)||al===null) al=0;
+  if(ml===""||isNaN(ml)||ml===null) ml=0;
+  if(jan===""||isNaN(jan)||jan===null) jan=0;
+  if(feb===""||isNaN(feb)||feb===null) feb=0;
+  if(mar===""||isNaN(mar)||mar===null) mar=0;
+  if(apr===""||isNaN(apr)||apr===null) apr=0;
+  if(may===""||isNaN(may)||may===null) may=0;
+  if(jun===""||isNaN(jun)||jun===null) jun=0;
+  if(jul===""||isNaN(jul)||jul===null) jul=0;
+  if(aug===""||isNaN(aug)||aug===null) aug=0;
+  if(sep===""||isNaN(sep)||sep===null) sep=0;
+  if(oct===""||isNaN(oct)||oct===null) oct=0;
+  if(nov===""||isNaN(nov)||nov===null) nov=0;
+  if(dec===""||isNaN(dec)||dec===null) dec=0;
+  if(jan_ml===""||isNaN(jan_ml)||jan_ml===null) jan_ml=0;
+  if(feb_ml===""||isNaN(feb_ml)||feb_ml===null) feb_ml=0;
+  if(mar_ml===""||isNaN(mar_ml)||mar_ml===null) mar_ml=0;
+  if(apr_ml===""||isNaN(apr_ml)||apr_ml===null) apr_ml=0;
+  if(may_ml===""||isNaN(may_ml)||may_ml===null) may_ml=0;
+  if(jun_ml===""||isNaN(jun_ml)||jun_ml===null) jun_ml=0;
+  if(jul_ml===""||isNaN(jul_ml)||jul_ml===null) jul_ml=0;
+  if(aug_ml===""||isNaN(aug_ml)||aug_ml===null) aug_ml=0;
+  if(sep_ml===""||isNaN(sep_ml)||sep_ml===null) sep_ml=0;
+  if(oct_ml===""||isNaN(oct_ml)||oct_ml===null) oct_ml=0;
+  if(nov_ml===""||isNaN(nov_ml)||nov_ml===null) nov_ml=0;
+  if(dec_ml===""||isNaN(dec_ml)||dec_ml===null) dec_ml=0;
+  if(rates===""||isNaN(rates)||rates===null) rates=0;
   aLeaves = parseInt(jan)+parseInt(feb)+parseInt(mar)+parseInt(apr)+parseInt(may)+parseInt(jun)+parseInt(jul)+parseInt(aug)+parseInt(sep)+parseInt(oct)+parseInt(nov)+parseInt(dec);
   mLeaves = parseInt(jan_ml)+parseInt(feb_ml)+parseInt(mar_ml)+parseInt(apr_ml)+parseInt(may_ml)+parseInt(jun_ml)+parseInt(jul_ml)+parseInt(aug_ml)+parseInt(sep_ml)+parseInt(oct_ml)+parseInt(nov_ml)+parseInt(dec_ml);
-  aLeaves= parseInt(al)-parseInt(aLeaves)+parseInt(cf);
+  aLeaves= parseInt(al)-parseInt(aLeaves);
   mLeaves= parseInt(ml)-parseInt(mLeaves);
   try {
     const updatedUser = await InputData2.findOneAndUpdate(
       { name },
-      { cn,clientName,year,cf,al,ml,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,jan_ml,feb_ml,mar_ml,apr_ml,may_ml,jun_ml,jul_ml,aug_ml,sep_ml,oct_ml,nov_ml,dec_ml,aLeaves,mLeaves },
+      { cn,clientName,subconNames,rates,remarks,ct,year,al,ml,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,jan_ml,feb_ml,mar_ml,apr_ml,may_ml,jun_ml,jul_ml,aug_ml,sep_ml,oct_ml,nov_ml,dec_ml,aLeaves,mLeaves },
       { new: true },
     );
     if (updatedUser) {
@@ -823,52 +845,82 @@ app.post('/updateDetailsLeave',authenticateStaff, async (req, res) => {
 });
 
 app.post('/uploadLeave',authenticateStaff, async (req, res) => {
-let {year,cn,clientName,name,cf,al,ml,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,jan_ml,feb_ml,mar_ml,apr_ml,may_ml,jun_ml,jul_ml,aug_ml,sep_ml,oct_ml,nov_ml,dec_ml} = req.body;
-const aLeaves = parseInt(jan)+parseInt(feb)+parseInt(mar)+parseInt(apr)+parseInt(may)+parseInt(jun)+parseInt(jul)+parseInt(aug)+parseInt(sep)+parseInt(oct)+parseInt(nov)+parseInt(dec);
-const mLeaves = parseInt(jan_ml)+parseInt(feb_ml)+parseInt(mar_ml)+parseInt(apr_ml)+parseInt(may_ml)+parseInt(jun_ml)+parseInt(jul_ml)+parseInt(aug_ml)+parseInt(sep_ml)+parseInt(oct_ml)+parseInt(nov_ml)+parseInt(dec_ml);
-try {
-  const inputData = new InputData2({
-    year: year,
-    cn: cn,
-    clientName: clientName,
-    name: name,
-    cf: parseInt(cf),
-    al: parseInt(al),
-    ml: parseInt(ml),
-    jan: parseInt(jan),
-    feb: parseInt(feb),
-    mar: parseInt(mar),
-    apr: parseInt(apr),
-    may: parseInt(may),
-    jun: parseInt(jun),
-    jul: parseInt(jul),
-    aug: parseInt(aug),
-    sep: parseInt(sep),
-    oct: parseInt(oct),
-    nov: parseInt(nov),
-    dec: parseInt(dec),
-    jan_ml: parseInt(jan_ml),
-    feb_ml: parseInt(feb_ml),
-    mar_ml: parseInt(mar_ml),
-    apr_ml: parseInt(apr_ml),
-    may_ml: parseInt(may_ml),
-    jun_ml: parseInt(jun_ml),
-    jul_ml: parseInt(jul_ml),
-    aug_ml: parseInt(aug_ml),
-    sep_ml: parseInt(sep_ml),
-    oct_ml: parseInt(oct_ml),
-    nov_ml: parseInt(nov_ml),
-    dec_ml: parseInt(dec_ml),
-    aLeaves: parseInt(al)-parseInt(aLeaves)+parseInt(cf),
-    mLeaves: parseInt(ml)-parseInt(mLeaves),
-  });
-  await inputData.save();
-  let a = fs.readFileSync("public/submitLeave.html")
-  res.send(a.toString())
-} catch (err) {
-  console.error(err);
-  res.status(500).send('Internal Server Error');
-}
+  let {year,cn,clientName,name,subconNames,rates,remarks,ct,al,ml,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec,jan_ml,feb_ml,mar_ml,apr_ml,may_ml,jun_ml,jul_ml,aug_ml,sep_ml,oct_ml,nov_ml,dec_ml} = req.body;
+  if(al===""||isNaN(al)||al===null) al=0;
+  if(ml===""||isNaN(ml)||ml===null) ml=0;
+  if(jan===""||isNaN(jan)||jan===null) jan=0;
+  if(feb===""||isNaN(feb)||feb===null) feb=0;
+  if(mar===""||isNaN(mar)||mar===null) mar=0;
+  if(apr===""||isNaN(apr)||apr===null) apr=0;
+  if(may===""||isNaN(may)||may===null) may=0;
+  if(jun===""||isNaN(jun)||jun===null) jun=0;
+  if(jul===""||isNaN(jul)||jul===null) jul=0;
+  if(aug===""||isNaN(aug)||aug===null) aug=0;
+  if(sep===""||isNaN(sep)||sep===null) sep=0;
+  if(oct===""||isNaN(oct)||oct===null) oct=0;
+  if(nov===""||isNaN(nov)||nov===null) nov=0;
+  if(dec===""||isNaN(dec)||dec===null) dec=0;
+  if(jan_ml===""||isNaN(jan_ml)||jan_ml===null) jan_ml=0;
+  if(feb_ml===""||isNaN(feb_ml)||feb_ml===null) feb_ml=0;
+  if(mar_ml===""||isNaN(mar_ml)||mar_ml===null) mar_ml=0;
+  if(apr_ml===""||isNaN(apr_ml)||apr_ml===null) apr_ml=0;
+  if(may_ml===""||isNaN(may_ml)||may_ml===null) may_ml=0;
+  if(jun_ml===""||isNaN(jun_ml)||jun_ml===null) jun_ml=0;
+  if(jul_ml===""||isNaN(jul_ml)||jul_ml===null) jul_ml=0;
+  if(aug_ml===""||isNaN(aug_ml)||aug_ml===null) aug_ml=0;
+  if(sep_ml===""||isNaN(sep_ml)||sep_ml===null) sep_ml=0;
+  if(oct_ml===""||isNaN(oct_ml)||oct_ml===null) oct_ml=0;
+  if(nov_ml===""||isNaN(nov_ml)||nov_ml===null) nov_ml=0;
+  if(dec_ml===""||isNaN(dec_ml)||dec_ml===null) dec_ml=0;
+  if(rates===""||isNaN(rates)||rates===null) rates=0;
+  const aLeaves = parseInt(jan)+parseInt(feb)+parseInt(mar)+parseInt(apr)+parseInt(may)+parseInt(jun)+parseInt(jul)+parseInt(aug)+parseInt(sep)+parseInt(oct)+parseInt(nov)+parseInt(dec);
+  const mLeaves = parseInt(jan_ml)+parseInt(feb_ml)+parseInt(mar_ml)+parseInt(apr_ml)+parseInt(may_ml)+parseInt(jun_ml)+parseInt(jul_ml)+parseInt(aug_ml)+parseInt(sep_ml)+parseInt(oct_ml)+parseInt(nov_ml)+parseInt(dec_ml);
+  try {
+    const inputData = new InputData2({
+      year: year,
+      cn: cn,
+      clientName: clientName,
+      name: name,
+      subconNames: subconNames,
+      rates: parseInt(rates),
+      ct: ct,
+      remarks: remarks,
+      al: parseInt(al),
+      ml: parseInt(ml),
+      jan: parseInt(jan),
+      feb: parseInt(feb),
+      mar: parseInt(mar),
+      apr: parseInt(apr),
+      may: parseInt(may),
+      jun: parseInt(jun),
+      jul: parseInt(jul),
+      aug: parseInt(aug),
+      sep: parseInt(sep),
+      oct: parseInt(oct),
+      nov: parseInt(nov),
+      dec: parseInt(dec),
+      jan_ml: parseInt(jan_ml),
+      feb_ml: parseInt(feb_ml),
+      mar_ml: parseInt(mar_ml),
+      apr_ml: parseInt(apr_ml),
+      may_ml: parseInt(may_ml),
+      jun_ml: parseInt(jun_ml),
+      jul_ml: parseInt(jul_ml),
+      aug_ml: parseInt(aug_ml),
+      sep_ml: parseInt(sep_ml),
+      oct_ml: parseInt(oct_ml),
+      nov_ml: parseInt(nov_ml),
+      dec_ml: parseInt(dec_ml),
+      aLeaves: parseInt(al)-parseInt(aLeaves),
+      mLeaves: parseInt(ml)-parseInt(mLeaves),
+    });
+    await inputData.save();
+    let a = fs.readFileSync("public/submitLeave.html")
+    res.send(a.toString())
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // Search
@@ -941,6 +993,7 @@ try {
   res.status(500).json({ error: error.message });
 }
 });
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////// Uploading to the drive ///////////////////////////////////////////////
@@ -1040,6 +1093,7 @@ let folderId = '';
 
 const { v4: uuidv4 } = require('uuid'); 
 const { addFolderMapping, getFolderByLink } = require('./folderStore.js');
+//const { use } = require('react');
 
 let folderName = '';
 app.post('/createFolder', authenticate, upload.none(), async (req, res) => {
@@ -1058,12 +1112,12 @@ app.post('/createFolder', authenticate, upload.none(), async (req, res) => {
       folderId = await getOrCreateFolderId(folderName, allFoldersParentId);
 
 
-    const linkId = uuidv4(); // unique identifier
-    addFolderMapping(linkId, folderName, folderId); // Save to file
+    const linkId = uuidv4(); 
+    addFolderMapping(linkId, folderName, folderId);
 
     const uploadLink = `${req.protocol}://${req.get('host')}/upload/${folderName}/${linkId}`;
     res.json({ message: `✅ Folder '${folderName}' is ready.`, uploadLink });
-    folderName = ''; // Reset folderName for next use
+    folderName = ''; 
     
   } catch (error) {
     console.error('Folder creation error:', error.message);
@@ -1121,6 +1175,22 @@ app.get('/folders', authenticate, async (req, res) => {
       q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed = false`,
       fields: 'files(id, name)',
     });
+    res.json(response.data.files);
+  } catch (error) {
+    console.error('Error listing subfolders:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+app.get('/folders/:folderId', authenticateStaff, async (req, res) => {
+  try {
+    const parentId = req.params.folderId;;
+
+    const response = await drive.files.list({
+      q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name)',
+    });
 
     res.json(response.data.files);
   } catch (error) {
@@ -1131,7 +1201,7 @@ app.get('/folders', authenticate, async (req, res) => {
 
 
 // List files inside a folder
-app.get('/folders/:folderId/files', authenticate, async (req, res) => {
+/*app.get('/folders/:folderId/files', authenticate, async (req, res) => {
   const folderId = req.params.folderId;
   try {
     const response = await drive.files.list({
@@ -1142,7 +1212,7 @@ app.get('/folders/:folderId/files', authenticate, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+});*/
 
 // Download file
 app.get('/download/:fileId', authenticate, async (req, res) => {
@@ -1158,6 +1228,62 @@ app.get('/download/:fileId', authenticate, async (req, res) => {
 
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     fileStream.data.pipe(res);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// Recursive function to fetch all files and nested folders
+async function listAllFiles(folderId, path = '') {
+  let result = [];
+
+  // Get folders and files in current folder
+  const response = await drive.files.list({
+    q: `'${folderId}' in parents and trashed = false`,
+    fields: 'files(id, name, mimeType, webViewLink, createdTime)',
+  });
+
+  for (const file of response.data.files) {
+    if (file.mimeType === 'application/vnd.google-apps.folder') {
+      // Recurse into subfolder
+      const subFiles = await listAllFiles(file.id, `${path}${file.name}/`);
+      result.push(...subFiles);
+    } else {
+      // Store files with full path
+      result.push({
+        id: file.id,
+        name: file.name,
+        webViewLink: file.webViewLink,
+        fullPath: `${path}${file.name}`,
+        createdTime: file.createdTime
+      });
+    }
+  }
+
+  return result;
+}
+
+// Endpoint to get all files recursively
+app.get('/folders/:folderId/allFiles', async (req, res) => {
+  const folderId = req.params.folderId;
+  try {
+    const files = await listAllFiles(folderId);
+    res.json(files);
+  } catch (error) {
+    console.error('Error listing all files:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+// Delete file endpoint
+app.delete('/delete/:fileId', authenticate, async (req, res) => {
+  const fileId = req.params.fileId;
+  try {
+    await drive.files.delete({ fileId });
+    res.json({ message: 'File deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
