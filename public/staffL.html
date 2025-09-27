@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Google Drive Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="logo.jpeg" style="border-radius: 25px;">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding: 30px;
+    }
+    .folder, .file {
+      transition: background-color 0.2s ease-in-out;
+    }
+    .folder:hover {
+      background-color: #61f38d;
+    }
+    .file:hover {
+      background-color: #f1f3f5;
+    }
+    .shortlisted-btn {
+      background-color: orange !important;
+      color: white !important;
+    }
+    .shortlist-count {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #fff;
+      background: #ff6600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 5px;
+    }
+    .filters label {
+      margin-right: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <h1 class="display-5 fw-bold text-primary">
+        📁 Google Drive Explorer
+        <span class="shortlist-count" id="shortlistCount">0</span>
+      </h1>
+      <p class="lead text-muted">Browse folders, shortlist files, and keep track of them easily.</p>
+    </div>
+
+
+    <!-- Folders Section -->
+    <div class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">Available Folders</div>
+        <div class="card-body" id="folders" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+      </div>
+    </div>
+
+    <!-- Files Section -->
+    <div>
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+          <span>Files in Selected Folder</span>
+          <div class="filters d-flex align-items-center">
+          <label for="monthFilter" class="me-2">Month:</label>
+          <select id="monthFilter" class="form-select form-select-sm me-3" style="width: 150px;">
+            <option value="">All</option>
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+          </select>
+
+          <label for="yearFilter" class="me-2">Year:</label>
+          <select id="yearFilter" class="form-select form-select-sm" style="width: 120px;">
+            <option value="">All</option>
+          </select>
+          <input type="text" id="searchInput" class="form-control form-control-sm mx-2" style="width: 200px;" placeholder="🔍 Search files...">
+        </div>
+        </div>
+        <div class="card-body" id="files">
+          <p class="text-muted">No folder selected.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let c = 0;
+    let shortlistedSet = new Set();
+    let currentFiles = [];
+    let currentFolderName = '';
+
+    // Fetch shortlisted IDs from server
+    async function fetchShortlist() {
+      const res = await fetch('/shortlist');
+      const ids = await res.json();
+      shortlistedSet = new Set(ids);
+    }
+
+    // Toggle shortlist for a file via backend
+    async function toggleShortlist(fileId, btn) {
+      const res = await fetch(`/shortlist/${fileId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const data = await res.json();
+      if (data.shortlisted) {
+        shortlistedSet.add(fileId);
+      } else {
+        shortlistedSet.delete(fileId);
+      }
+      updateShortlistButton(btn, data.shortlisted);
+    }
+
+    // Update button UI
+    function updateShortlistButton(btn, isShortlisted) {
+      btn.textContent = isShortlisted ? 'Shortlisted' : 'Shortlist';
+      btn.classList.toggle('shortlisted-btn', isShortlisted);
+    }
+
+    async function loadFolders() {
+      const res = await fetch('/folders');
+      const folders = await res.json();
+      console.log(folders);
+      const foldersDiv = document.getElementById('folders');
+      foldersDiv.innerHTML = '';
+      folders.forEach(folder => {
+        const folderBtn = document.createElement('button');
+        folderBtn.className = 'btn btn-outline-primary folder';
+        folderBtn.textContent = `📁 ${folder.name}`;
+        folderBtn.onclick = () => loadFiles(folder.id, folder.name);
+        foldersDiv.appendChild(folderBtn);
+      });
+    }
+
+    async function lakshmiFolders(folderId) {
+      const res = await fetch(`/folders/${folderId}`);
+      const folders = await res.json();
+      let lakshmiFolder = folders.slice(6,8)
+      console.log(folders);
+      const foldersDiv = document.getElementById('folders');
+      foldersDiv.innerHTML = '';
+      lakshmiFolder.forEach(folder => {
+        const folderBtn = document.createElement('button');
+        folderBtn.className = 'btn btn-outline-primary folder';
+        folderBtn.textContent = `📁 ${folder.name}`;
+        folderBtn.onclick = () => loadFiles(folder.id, folder.name);
+        foldersDiv.appendChild(folderBtn);
+      });
+    }
+
+ 
+    // Initial load
+    (async () => {
+      await fetchShortlist();
+      lakshmiFolders('16CFpzBL0HcLDK3I06MtOMKORMpkcH6G1');
+    })();
+
+    
+async function loadFiles(folderId, folderName) {
+    const res = await fetch(`/folders/${folderId}/allFiles`);
+    const files = await res.json();
+    currentFiles = files;
+    currentFolderName = folderName;
+    renderFiles(currentFiles);
+}
+
+let selectedMonth = "";
+let selectedYear = "";
+let searchTerm = "";
+
+// Setup filters & search
+document.addEventListener("DOMContentLoaded", () => {
+  const monthFilter = document.getElementById("monthFilter");
+  const yearFilter = document.getElementById("yearFilter");
+  const searchInput = document.getElementById("searchInput");
+
+  if (monthFilter) {
+    monthFilter.addEventListener("change", () => {
+      selectedMonth = monthFilter.value;
+      renderFiles(currentFiles);
+    });
+  }
+
+  if (yearFilter) {
+    yearFilter.addEventListener("change", () => {
+      selectedYear = yearFilter.value;
+      renderFiles(currentFiles);
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      searchTerm = searchInput.value.toLowerCase();
+      renderFiles(currentFiles);
+    });
+  }
+});
+
+// Populate available years dynamically
+function populateYearFilter(files) {
+  const yearFilter = document.getElementById("yearFilter");
+  const years = [...new Set(files.map(f => new Date(f.createdTime).getFullYear()))];
+  yearFilter.innerHTML = `<option value="">All</option>`;
+  years.sort((a, b) => b - a).forEach(year => {
+    yearFilter.innerHTML += `<option value="${year}">${year}</option>`;
+  });
+}
+
+// Render files with all filters (month + year + search)
+function renderFiles(files) {
+  const filesDiv = document.getElementById('files');
+
+  // update year dropdown
+  populateYearFilter(files);
+
+  let filteredFiles = files;
+
+  // Month filter
+  if (selectedMonth !== "") {
+    filteredFiles = filteredFiles.filter(file => {
+      const date = new Date(file.createdTime);
+      return date.getMonth().toString() === selectedMonth;
+    });
+  }
+
+  // Year filter
+  if (selectedYear !== "") {
+    filteredFiles = filteredFiles.filter(file => {
+      const date = new Date(file.createdTime);
+      return date.getFullYear().toString() === selectedYear;
+    });
+  }
+
+  // Search filter
+  if (searchTerm !== "") {
+    filteredFiles = filteredFiles.filter(file =>
+      file.fullPath.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  if (filteredFiles.length === 0) {
+    filesDiv.innerHTML = `<p class="text-muted">No files match the filters/search in "<strong>${currentFolderName}</strong>".</p>`;
+    return;
+  }
+
+  filesDiv.innerHTML = `<h5>📂 Files in "<strong>${currentFolderName}</strong>":</h5>`;
+  filteredFiles.forEach(file => {
+    const fileDiv = document.createElement('div');
+    fileDiv.className = 'file p-2 border rounded my-2 bg-light d-flex align-items-center justify-content-between';
+
+    const leftPart = document.createElement('div');
+    leftPart.innerHTML = `📄 <strong>${file.fullPath}</strong>`;
+
+    const time = document.createElement('span');
+    time.innerHTML = `<br><small class="text-muted">Created: ${file.createdTime}</small>`;
+
+    const rightPart = document.createElement('div');
+    rightPart.innerHTML = `
+      <a href="${file.webViewLink}" target="_blank" class="btn btn-sm btn-outline-primary me-1">View</a>
+      <a href="/download/${file.id}" class="btn btn-sm btn-outline-success me-1">Download</a>
+    `;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn btn-sm btn-outline-danger me-1';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = async () => {
+      if (confirm(`Are you sure you want to delete "${file.fullPath}"?`)) {
+        await fetch(`/delete/${file.id}`, { method: 'DELETE' });
+        loadFiles(file.id, currentFolderName);
+      }
+    };
+
+    rightPart.appendChild(deleteBtn);
+    rightPart.appendChild(time);
+
+    fileDiv.appendChild(leftPart);
+    fileDiv.appendChild(rightPart);
+
+    filesDiv.appendChild(fileDiv);
+  });
+}
+
+  </script>
+</body>
+</html>
