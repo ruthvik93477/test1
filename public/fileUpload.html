@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload to Google Drive</title>
+  <link rel="icon" href="logo.jpeg" style="border-radius: 25px;">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .upload-container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1a237e;
+      font-weight: 600;
+      margin-bottom: 25px;
+    }
+
+    .form-control[type="file"] {
+      border: 2px dashed #90caf9;
+      border-radius: 10px;
+      padding: 20px;
+      background-color: #f1f8ff;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control[type="file"]:hover {
+      border-color: #42a5f5;
+    }
+
+    .btn-upload {
+      margin-top: 20px;
+      background-color: #1976d2;
+      color: white;
+      width: 100%;
+      font-weight: 500;
+      border-radius: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-upload:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="upload-container">
+    <h2>📤 Upload your files here</h2>
+    <form id="uploadForm" enctype="multipart/form-data" method="post">
+      <input type="file" name="files" class="form-control mb-3" multiple required />
+      <button type="submit" class="btn btn-upload" onclick="text1()">Upload Files</button>
+      <span id="wait"></span>
+    </form>
+  </div>
+
+  <!-- ✅ Thank You Modal -->
+  <div class="modal fade" id="thankYouModal" tabindex="-1" aria-labelledby="thankYouLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="thankYouLabel">🎉 Thank You!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Your files were successfully uploaded. You can close the tab</p>
+          <button class="btn btn-success" onclick="closeTab()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pathSegments = window.location.pathname.split('/');
+    const linkId = pathSegments[pathSegments.length - 1];
+    const folderName = pathSegments[pathSegments.length - 2];
+
+    const form = document.getElementById('uploadForm');
+    form.action = `/upload/${folderName}/${linkId}`;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        document.getElementById('wait').innerText = '';
+
+        if (response.ok) {
+          const thankYouModal = new bootstrap.Modal(document.getElementById('thankYouModal'));
+          thankYouModal.show();
+        } else {
+          alert(result.message || "Upload failed.");
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert("Upload failed. Please try again.");
+      }
+    });
+
+    function text1() {
+      document.getElementById('wait').innerText = "Please wait until popup appears.........";
+    }
+
+    function closeTab() {
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>

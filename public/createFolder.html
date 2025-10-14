@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Folder</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" href="logo.jpeg" style="border-radius: 25px;">
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #e3f2fd, #f1f8e9);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      
+    }
+    .container {
+      max-width: 650px;
+    }
+
+    h2 {
+      font-weight: 600;
+      color: #1a237e;
+    }
+
+    .card {
+      border: none;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      background-color: #ffffff;
+    }
+
+    .card-header {
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+      font-size: 1.1rem;
+    }
+
+    .card-header.bg-success {
+      background-color: #2e7d32 !important;
+    }
+
+    .card-header.bg-dark {
+      background-color: #263238 !important;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .form-control {
+      border-radius: 10px;
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .btn {
+      transition: all 0.3s ease;
+      font-weight: 500;
+      border-radius: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-warning {
+      background-color: #fbc02d;
+      border: none;
+      color: #212121;
+    }
+
+    .btn-outline-primary, .btn-outline-success {
+      min-width: 120px;
+    }
+
+    .icon {
+      margin-right: 6px;
+    }
+
+    .link-box {
+      margin-top: 15px;
+      background: #f1f8e9;
+      padding: 15px;
+      border: 1px dashed #aed581;
+      border-radius: 10px;
+      word-break: break-word;
+    }
+
+    .copy-button {
+      margin-top: 10px;
+      background-color: #81c784;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background-color: #66bb6a;
+    }
+
+    .copied-msg {
+      color: green;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="text-center mb-5 mt-5">📁 Create a New Folder for Posting</h2>
+
+    <form id="createForm" enctype="multipart/form-data" action="/createFolder">
+      <!-- Posting Name Card -->
+      <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">Name of the Folder</h5>
+        </div>
+        <div class="card-body">
+          <input type="text" id="postName" name="postName" class="form-control mb-4" placeholder="Enter folder name..." required />
+          <button type="submit" class="btn btn-warning w-100" onclick="text()">
+            <span class="icon">➕</span> Create Folder
+          </button>
+          <span id="wait"></span>
+
+          <!-- Link Display Box -->
+          <div id="linkSection" class="link-box mt-4" style="display: none;">
+            <div><strong>Shareable Upload Link:</strong></div>
+            <div id="uploadLink" class="text-primary mt-2"></div>
+            <button type="button" class="copy-button" onclick="copyLink()">📋 Copy Link</button>
+            <div class="copied-msg" id="copiedMsg">✅ Link copied to clipboard!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View or Upload Card -->
+      <div class="card mb-5">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">📂 View Files</h5>
+        </div>
+        <div class="card-body d-flex justify-content-around flex-wrap">
+          <a href="/viewFiles" class="btn btn-outline-primary m-2">
+            <span class="icon">📄</span> View
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let folderNam = document.getElementById('postName').value.trim();
+      let folderName = '';
+      for(let i=0;i<folderNam.length;i++){
+        if(folderNam[i] === ' '){
+          folderName += '_';
+        }
+        else{
+          folderName+=folderNam[i];
+        }
+      }
+      if (!folderName) {
+        alert("Please enter a valid posting name.");
+        return;
+      }
+
+      const formData = new FormData(e.target);
+      try {
+        const response = await fetch('/createFolder', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        alert(result.message);
+        document.getElementById('wait').innerText = '';
+
+        // Show the upload link section
+        if (result.uploadLink) {
+          document.getElementById('linkSection').style.display = 'block';
+          document.getElementById('uploadLink').innerText = result.uploadLink;
+        }
+      } catch (error) {
+        alert("An error occurred. Please try again.");
+      }
+    });
+
+    function text() {
+      const waitMsg = "Please wait until popup appears.........";
+      document.getElementById('wait').innerText = waitMsg;
+    }
+
+    function copyLink() {
+      const link = document.getElementById('uploadLink').innerText;
+      navigator.clipboard.writeText(link).then(() => {
+        const msg = document.getElementById('copiedMsg');
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 2000);
+      });
+    }
+  </script>
+</body>
+</html>

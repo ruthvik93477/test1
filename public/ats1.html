@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Details Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <link rel="icon" href="logo.jpeg" style="border-radius: 25px;">
+
+  <style>
+    body {
+      background-color: #e4effe;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .form-container {
+      max-width: 1000px;
+      margin: 60px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 40px 50px;
+    }
+
+    .form-title {
+      text-align: center;
+      color: #0d6efd;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6c757d;
+      margin-bottom: 40px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+
+    .btn-outline-primary {
+      border: 1px solid #0d6efd;
+      color: #0d6efd;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    footer {
+      text-align: center;
+      color: #6c757d;
+      margin-top: 30px;
+      font-size: 14px;
+    }
+    #remarks {
+      height: 80px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="form-container">
+      <h2 class="form-title">Candidate Details Form</h2>
+      <p class="subtitle">Please fill in the candidate's professional and contact details</p>
+
+      <form id="candidateForm" class="row g-4 needs-validation" action="/employeeForm" method="post" novalidate>
+        <div class="col-md-4">
+          <label for="name" class="form-label">Candidate Name</label>
+          <input type="text" class="form-control move" id="name" name="name" placeholder="Full Name" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control move" id="email" name="email" placeholder="example@email.com" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="phone" class="form-label">Phone</label>
+          <input type="tel" class="form-control move" id="phone" name="phone" placeholder="+91 98765 43210" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="skillSet" class="form-label">Skillset / Primary Tech</label>
+          <input type="text" class="form-control move" id="skillSet" name="skillSet" placeholder="React, Node.js, Java">
+        </div>
+
+        <div class="col-md-4">
+          <label for="experience" class="form-label">Total Experience (Years)</label>
+          <input type="number" class="form-control move" id="experience" name="experience" placeholder="e.g. 3.5">
+        </div>
+
+        <div class="col-md-4">
+          <label for="location" class="form-label">Current Location</label>
+          <input type="text" class="form-control move" id="location" name="location" placeholder="City, Country">
+        </div>
+
+        <div class="col-md-4">
+          <label for="nationality" class="form-label">Nationality / Work Visa</label>
+          <input type="text" class="form-control move" id="nationality" name="nationality" placeholder="e.g. Indian / H1B">
+        </div>
+
+        <div class="col-md-4">
+          <label for="client" class="form-label">Client / Project</label>
+          <input type="text" class="form-control move" id="client" name="client" placeholder="Client or Project name">
+        </div>
+
+        <div class="col-md-4">
+          <label for="role" class="form-label">Role / Title</label>
+          <input type="text" class="form-control move" id="role" name="role" placeholder="e.g. Senior Developer">
+        </div>
+
+        <div class="col-md-4">
+          <label for="recruiter" class="form-label">Recruiter</label>
+          <input type="text" class="form-control move" id="recruiter" name="recruiter" placeholder="Recruiter's name">
+        </div>
+
+        <div class="col-md-4">
+          <label for="source" class="form-label">Source</label>
+          <select class="form-select" id="source" name="source">
+            <option>Referral</option>
+            <option>LinkedIn</option>
+            <option>Job Board</option>
+            <option>Agency</option>
+            <option>Database</option>
+            <option>Career Page</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="stage" class="form-label">Interview Stage</label>
+          <select class="form-select" id="stage" name="stage">
+            <option>Submitted</option>
+            <option>Screened</option>
+            <option>L1</option>
+            <option>L2</option>
+            <option>Client Panel</option>
+            <option>Selected</option>
+            <option>Offer</option>
+            <option>Joined</option>
+            <option>Rejected</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label for="availability" class="form-label">Availability (Date or Notice)</label>
+          <input type="text" class="form-control move" id="availability" name="availability" placeholder="Immediate / 15 Days">
+        </div>
+
+        <div class="col-md-4">
+          <label for="rate" class="form-label">Expected Rate (Day/Month)</label>
+          <input type="text" class="form-control move" id="rate" name="rate" placeholder="e.g. 6000/month">
+        </div>
+
+        <div class="col-md-4">
+          <label for="currency" class="form-label">Currency</label>
+          <select class="form-select" id="currency" name="currency">
+            <option value="SGD">SGD</option>
+            <option value="USD">USD</option>
+            <option value="THB">THB</option>
+            <option value="MYR">MYR</option>
+            <option value="INR">INR</option>
+            <option value="PHP">PHP</option>
+            <option value="IDR">IDR</option>
+            <option value="VND">VND</option>
+            <option value="AED">AED</option>
+          </select>
+        </div>
+
+        <!--<div class="col-md-4">
+          <label for="status" class="form-label">Status</label>
+          <select class="form-select" id="status">
+            <option>Active</option>
+            <option>On Hold</option>
+            <option>Selected</option>
+            <option>Deployed</option>
+            <option>Rejected</option>
+            <option>Closed</option>
+          </select>
+        </div>-->
+
+        <div class="col-12">
+          <label for="cvLink" class="form-label">CV Link</label>
+          <input type="text" class="form-control move" id="cvLink" name="cvLink" placeholder="Paste Google Drive or Dropbox link">
+        </div>
+
+        <div class="col-12">
+          <label for="createdAt" class="form-label">Created Date</label>
+          <input type="text" class="form-control move" id="createdAt" name="createdAt" placeholder="Created Date" disabled>
+        </div>
+
+        <div class="col-12">
+          <label for="remarks" class="form-label">Remarks</label>
+          <input class="form-control move" id="remarks" name="remarks" placeholder="Add remarks or additional info..."></input>
+        </div>
+        
+
+        <div class="col-12 mt-4">
+          <button type="submit" class="btn btn-primary" >Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>© 2025 Candidate Management System | Designed with Bootstrap 5</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    (function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+        })
+    })()
+</script>
+<script>
+    $(function(){
+    var keyLeft = 37;
+    var keyRight = 39;
+    var keyUp = 38;
+    var keyDown = 40;
+    $(document).keydown(
+        function(e)
+        {
+            var moves = $(".move");
+            if (e.keyCode == keyRight) {
+                for(i = 0; i <= moves.length; i++) {
+                    if (moves[i] == $(".move:focus").get(0)) {
+                       $(moves[i + 1]).focus();
+                        break;
+                    }
+                }
+            }
+            if (e.keyCode == keyLeft) {
+                for(i = 0; i <= moves.length; i++) {
+                    if (moves[i] == $(".move:focus").get(0)) {
+                       $(moves[i - 1]).focus();
+                        break;
+                    }
+                }
+            }
+            if (e.keyCode == keyDown) {
+                for(i = 0; i <= moves.length; i++) {
+                    if (moves[i] == $(".move:focus").get(0)) {
+                       $(moves[i + 3]).focus();
+                        break;
+                    }
+                }
+            }
+            if (e.keyCode == keyUp) {
+                for(i = 0; i <= moves.length; i++) {
+                    if (moves[i] == $(".move:focus").get(0)) {
+                       $(moves[i - 3]).focus();
+                        break;
+                    }
+                }
+            }
+        }
+    );
+});
+      var currentdate = new Date();
+      var datetime = currentdate.getDate() + "/"
+                      + (currentdate.getMonth()+1)  + "/" 
+                      + currentdate.getFullYear() + " @ "  
+                      + currentdate.getHours() + ":"  
+                      + currentdate.getMinutes() + ":" 
+                      + currentdate.getSeconds();
+      console.log(datetime);
+      document.getElementById("createdAt").value = datetime;
+
+  </script>
+</body>
+</html>

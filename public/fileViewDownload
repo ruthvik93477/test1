@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Drive File Viewer</title>
+</head>
+<body>
+  <h2>Files from Google Drive</h2>
+  <ul id="fileList">Loading...</ul>
+
+  <script>
+    async function fetchFiles() {
+      const res = await fetch('/files'); // or `/files?folderId=XYZ` to filter
+      const files = await res.json();
+
+      const list = document.getElementById('fileList');
+      list.innerHTML = '';
+
+      if (files.length === 0) {
+        list.innerHTML = '<li>No files found.</li>';
+        return;
+      }
+
+      files.forEach(file => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${file.name}</strong>
+          [<a href="/view/${file.id}" target="_blank">View</a>]
+          [<a href="/download/${file.id}/${encodeURIComponent(file.name)}">Download</a>]
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    fetchFiles();
+  </script>
+</body>
+</html>

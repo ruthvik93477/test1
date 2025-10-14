@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .image{
+            margin-top: 10px; 
+        }
+        .gap{
+            margin-top: -40px;
+        }
+        .push{
+            padding-left: 75%;
+        }
+    </style>
+</head>
+<body>
+    <div class="justify-content-center d-flex h2"><i>TAX INVOICE</i></div>
+    <form>
+        <table class="table-bordered w-100 p-2">
+            <tr>
+                <td class="p-1"><b>AITEK PVK SDN BHD</b><br>
+                    29-2, Level 29, Oval Damansara <br>
+                    685, Jalan Damansara, Taman Tun Dr. Ismail 60000 <br>
+                    Wilayah Persekutuan Kuala Lumpur <br>
+                    Email: Contact@aitekltd.com <br>
+                    SST No. W10-2301-32000038 <br>
+                </td>
+                <td><div class="justify-content-end d-flex me-5 mb-1 image"><img src="./logo.jpeg"></div></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>&nbsp;&nbsp;<b>Invoice No:</b> <span id="invoice"></span><br>
+                    &nbsp;&nbsp;<b>Date:</b> <span id="date"></span><br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr >
+                <td class="p-1"><b>Invoice To:</b><br>
+                    SONATA SOFTWARE MALAYSIA SDN. BHD.<br>
+                    Address: 29-4 & 31-4, Block F2, Jalan PJU 1/42A,<br>
+                    Dataran Prima, 47301, Petaling Jaya, Selangor, Malaysia <br>
+                </td>
+            </tr>
+            <tr>
+                <td><b>Service Period: </b><span id="period"></span></td>
+            </tr>
+            <tr class="text-light">
+                <td>--</td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr class="bg-primary">
+                <td><b>Activity</b>&nbsp;&nbsp;</td>
+                <td><b>Name:</b></td>
+                <td><b>No of Man Days:</b>&nbsp;&nbsp;</td>
+                <td><b>Rate in USD</b>&nbsp;&nbsp;</td>
+                <td><b>SST</b>&nbsp;&nbsp;</td>
+                <td><b>Amount in MYR</b>&nbsp;&nbsp;</td>  
+            </tr>
+            <tr>
+                <td>Consulting fees</td>
+                <td><b><span id="name"></span></b></td>
+                <td><span id="days"></span></td>
+                <td id="usd"></td>
+                <td><span id="sst"></span>%</td>
+                <td><span id="myr"></span></td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="p-1">Please remit the total including SST amount<br>
+                    AITEK PVK SDN BHD <br>
+                    Account No: 8881052269518 <br>
+                    Swift Code: ARBKMYKL <br>
+                    Bank name: AMBANK (M) BERHAD <br>
+                </td>
+            </tr>
+        </table>
+        <table class="table-bordered w-100">
+            <tr>
+                <td class="push">Sub Total: <span id="subTotal"></span> <br>
+                    SST Total: <span id="sstAmount"></span><br>
+                    Total: <span id="totalAmount"></span>
+                    <br>
+                    <br>
+                     <b>Balance Due:</b> <span id="balDue"></span>
+                </td>
+            </tr>
+        </table>
+        <h6><b>SST SUMMARY</b></h6>
+        <table class="table-bordered w-100">
+            <tr class="bg-primary text-center">
+                <td><b>Rate</b></td>
+                <td><b>SST Amount</b></td>
+                <td><b>Net Amount</b></td>
+            </tr>
+            <tr class="text-center">
+                <td>SST@<span id="sstLower"></span>%</td>
+                <td><span id="sstAmountLower"></span></td>
+                <td><span id="totalAmountLower"></span></td>
+            </tr>
+        </table>
+        <h5 class="text-center p-2"><b>THANK YOU FOR THE BUSINESS</b></h5>
+    </form>
+</body>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const invoiceNumber = params.get("invoiceNumber");
+    const date = params.get("date");
+    const servicePeriod = params.get("servicePeriod");
+    const fees = params.get("fees");
+    const sst = params.get("sst");
+    const usd = params.get("usd");
+    const myr = params.get("myr");
+    const days = params.get("days");
+
+/*--------------------------------------------DECODING THE EXPORTED VALUES-----------------------------------------*/
+    const decinvoiceNumber = decodeURIComponent(invoiceNumber);
+    const decdate = decodeURIComponent(date);
+    const decservicePeriod = decodeURIComponent(servicePeriod);
+    const decsst = decodeURIComponent(sst);
+    const decfees = decodeURIComponent(fees);
+    const decusd = decodeURIComponent(usd);
+    const decmyr = decodeURIComponent(myr);
+    const decdays = decodeURIComponent(days);
+/*-----------------------------------------------------Math---------------------------------------------------------*/
+    let subTotal = (parseFloat(decmyr)).toFixed(2);
+    let sstAmount = (parseFloat(subTotal)*parseFloat(decsst/100)).toFixed(2);
+    let totalAmount = (parseFloat(sstAmount)+parseFloat(subTotal)).toFixed(2);
+/*-------------------------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------Printing--------------------------------------------------------*/
+    document.getElementById("invoice").textContent = decinvoiceNumber;
+    document.getElementById("date").textContent = decdate;
+    document.getElementById("period").textContent = decservicePeriod;
+    document.getElementById("name").textContent = decfees;
+    document.getElementById("days").textContent = decdays;
+    document.getElementById("sst").textContent = decsst;
+    document.getElementById("usd").textContent = decusd;
+    document.getElementById("myr").textContent = decmyr;
+    document.getElementById("subTotal").textContent = subTotal;
+    document.getElementById("sstAmount").textContent = sstAmount;
+    document.getElementById("totalAmount").textContent = totalAmount;
+    document.getElementById("balDue").textContent = totalAmount;
+    document.getElementById("sstLower").textContent = decsst;
+    document.getElementById("sstAmountLower").textContent = sstAmount;
+    document.getElementById("totalAmountLower").textContent = subTotal;
+/*--------------------------------------------------------------------------------------------------------------------*/
+</script>
+</html>

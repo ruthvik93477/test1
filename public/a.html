@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Month-Year Filter Demo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4 bg-light">
+  <div class="container bg-white p-4 rounded shadow-sm">
+    <h3 class="text-primary mb-4">🧑‍💼 Employee Filter (Month + Year)</h3>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <select id="monthFilter" class="form-select">
+          <option value="">Filter by Month</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select id="yearFilter" class="form-select">
+          <option value="">Filter by Year</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <button id="applyFilter" class="btn btn-primary w-100">Apply Filter</button>
+      </div>
+    </div>
+
+    <div id="result" class="mt-4"></div>
+  </div>
+
+  <script>
+    // 🧠 Step 1: Create some mock employee data
+    const employees = [
+      { name: "Ravi Kumar", createdAt: "2023-02-10T08:45:00Z" },
+      { name: "Sneha Reddy", createdAt: "2024-10-05T12:30:00Z" },
+      { name: "Anil Mehta", createdAt: "2024-03-18T09:00:00Z" },
+      { name: "Priya Sharma", createdAt: "2025-10-02T16:15:00Z" },
+      { name: "Rahul Verma", createdAt: "2025-01-20T10:00:00Z" },
+      { name: "Lakshmi Narayana", createdAt: "2025-03-28T07:30:00Z" }
+    ];
+
+    const monthFilter = document.getElementById('monthFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    const applyFilterBtn = document.getElementById('applyFilter');
+    const resultDiv = document.getElementById('result');
+
+    // 🧩 Step 2: Populate the "Year" dropdown dynamically
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= currentYear - 5; y--) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearFilter.appendChild(opt);
+    }
+
+    // 🧩 Step 3: Function to display employees on the page
+    function displayEmployees(list) {
+      if (!list.length) {
+        resultDiv.innerHTML = `<div class="text-muted">No employees found for selected filters.</div>`;
+        return;
+      }
+
+      resultDiv.innerHTML = list.map(emp => {
+        const date = new Date(emp.createdAt);
+        return `
+          <div class="border-start border-4 border-primary ps-3 mb-2">
+            <strong>${emp.name}</strong><br>
+            <small>Created on: ${date.toLocaleDateString()}</small>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 🧩 Step 4: Filter logic
+    function filterEmployees() {
+      const month = monthFilter.value;
+      const year = yearFilter.value;
+
+      const filtered = employees.filter(emp => {
+        const date = new Date(emp.createdAt);
+        const empMonth = date.getMonth() + 1; // 0-based → +1
+        const empYear = date.getFullYear();
+
+        const monthMatch = month ? empMonth == month : true;
+        const yearMatch = year ? empYear == year : true;
+
+        return monthMatch && yearMatch;
+      });
+
+      displayEmployees(filtered);
+    }
+
+    // 🧩 Step 5: Hook the button
+    applyFilterBtn.addEventListener('click', filterEmployees);
+
+    // Display all by default
+    displayEmployees(employees);
+  </script>
+</body>
+</html>

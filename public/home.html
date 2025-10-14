@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | AITEK</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" href="logo.jpeg" style="border-radius: 25px;">
+  <style>
+    body {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', sans-serif;
+      color: #f1f1f1;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: rgba(30, 41, 59, 0.9);
+      padding: 20px 40px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.7rem;
+      color: #0dcaf0;
+      letter-spacing: 2px;
+    }
+
+    .container {
+      padding-top: 50px;
+    }
+
+    .content-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .card-section {
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 20px;
+      padding: 25px;
+      flex: 1 1 45%;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    /* .card-section:hover {
+      transform: translateY(-10px);
+    } */
+
+    h1, h2 {
+      color: #0dcaf0;
+    }
+
+    .btn-custom {
+      width: 250px;
+      padding: 15px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 120px;
+      height: 200px;
+      transition: background 0.3s;
+      border: none;
+      color: white;
+      background-color: rgb(28, 57, 186);
+    }
+
+    .btn-custom:hover{
+      background-color: white;
+      color: green;
+      font-size: 20px;
+      transition: 0.6s ease-in-out;
+      font-weight: 700;
+    }
+
+    .btn-warning:hover, .btn-primary:hover {
+      opacity: 0.85;
+    }
+
+    .section-title {
+      margin-top: 35px;
+      font-size: 1.5rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <span class="navbar-brand">AITEK</span>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="content-wrapper">
+      <!-- Login Section -->
+      <div class="card-section text-center">
+        <h1 class="mb-5">Welcome Back</h1>
+        <div class="row">
+          <div class="col-md">
+            <a href="/login"><button class="btn-custom m-3">Login as Admin</button></a>
+            <a href="/loginStaff"><button class="btn-custom m-3">Login as Staff</button></a>
+          </div>
+        </div>
+      </div>
+      <!-- Info Section -->
+      <div class="card-section">
+        <h1>About Us</h1>
+        <p>
+          We are a Consulting and IT Services Provider offering a wide range of business technology solutions. Our mission is to deliver excellence by combining top-notch technology, industry insights, and an obsession with results.
+        </p>
+
+        <h2 class="section-title">Our Vision</h2>
+        <p>
+          Deliver smart, scalable solutions with lightning-fast deployment that empowers clients to maximize their return on investment through the latest innovations.
+        </p>
+
+        <h2 class="section-title">Mission & Values</h2>
+        <p>
+          At AITEK, we’re dedicated to enabling success for businesses in the ever-changing digital world. We value integrity, innovation, and customer-centric strategies.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

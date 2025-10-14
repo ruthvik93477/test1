@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f7fc;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .search-container {
+      max-width: 1100px;
+      margin: 60px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 30px 40px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .employee-card {
+      border-left: 5px solid #007bff;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .employee-card:hover {
+      background-color: #f0f8ff;
+      transform: translateY(-2px);
+    }
+    .results-container {
+      margin-top: 30px;
+      max-height: 550px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="search-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="text-primary fw-bold mb-0">👩‍💼 Employee Dashboard</h3>
+    </div>
+
+    <div class="filters mb-4">
+      <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search by name..." style="flex:2;">
+      <select id="monthFilter" class="form-select" style="flex:1;">
+        <option value="">Filter by Month</option>
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+      <select id="yearFilter" class="form-select" style="flex:1;">
+        <option value="">Filter by Year</option>
+      </select>
+      <button class="btn btn-primary" id="applyFilter">Apply Filter</button>
+      <button class="btn btn-secondary" id="resetFilter">Reset</button>
+    </div>
+
+    <div id="results" class="results-container"></div>
+  </div>
+
+  <!-- Employee Modal -->
+  <div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Employee Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="employeeForm">
+            <div class="row g-3">
+              <input type="hidden" id="empId">
+
+              <div class="col-md-6"><label class="form-label">Name</label><input type="text" id="empName" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Email</label><input type="email" id="empEmail" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Phone</label><input type="text" id="empPhone" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Skill Set</label><input type="text" id="empSkill" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Experience</label><input type="text" id="empExp" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Location</label><input type="text" id="empLoc" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Nationality</label><input type="text" id="empNation" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Client / Project</label><input type="text" id="empClient" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Role</label><input type="text" id="empRole" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Recruiter</label><input type="text" id="empRecruiter" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Source</label><input type="text" id="empSource" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Interview Stage</label><input type="text" id="empStage" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Availability</label><input type="text" id="empAvail" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">Rate</label><input type="text" id="empRate" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">Currency</label><input type="text" id="empCurrency" class="form-control"></div>
+              <div class="col-md-12"><label class="form-label">CV Link</label><input type="text" id="empCV" class="form-control"></div>
+              <div class="col-md-12"><label class="form-label">Remarks</label><input type="text" id="empRemarks" class="form-control"></div>
+              <div class="col-md-12"><label class="form-label">Created Time</label><input type="text" id="empCreatedTime" class="form-control" disabled></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button id="deleteBtn" class="btn btn-danger me-auto">🗑 Delete</button>
+          <button id="saveChanges" class="btn btn-success">💾 Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+    const resultsDiv = document.getElementById('results');
+    const searchInput = document.getElementById('searchInput');
+    const monthFilter = document.getElementById('monthFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    const applyFilterBtn = document.getElementById('applyFilter');
+    const resetFilterBtn = document.getElementById('resetFilter');
+
+    // Populate Year Dropdown (last 10 years)
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= currentYear - 10; y--) {
+      const option = document.createElement('option');
+      option.value = y;
+      option.textContent = y;
+      yearFilter.appendChild(option);
+    }
+
+    // Fetch and display all employees
+    window.onload = () => loadEmployees();
+
+    async function loadEmployees(query = '', month = '', year = '') {
+      let url = `/getEmployees?query=${encodeURIComponent(query)}`;
+      if (month) url += `&month=${month}`;
+      if (year) url += `&year=${year}`;
+
+      const res = await fetch(url);
+      const employees = await res.json();
+      displayEmployees(employees);
+    }
+
+    function displayEmployees(employees) {
+      if (!employees.length) {
+        resultsDiv.innerHTML = `<div class="text-center text-muted mt-3">No employees found</div>`;
+        return;
+      }
+
+      resultsDiv.innerHTML = employees.map(emp => `
+        <div class="card mb-3 employee-card" onclick="showEmployeeDetails('${emp._id}')">
+          <div class="card-body">
+            <h5 class="card-title text-primary mb-2">${emp.name}</h5>
+            <p><strong>Skill:</strong> ${emp.skillSet || 'N/A'} | <strong>Client:</strong> ${emp.client || 'N/A'}</p>
+            <p class="text-muted mb-0"><small>Uploaded: ${new Date(emp.createdAt).toLocaleDateString()}</small></p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        loadEmployees(searchInput.value.trim(), monthFilter.value, yearFilter.value);
+      }, 400);
+    });
+
+    applyFilterBtn.addEventListener('click', () => {
+      loadEmployees(searchInput.value.trim(), monthFilter.value, yearFilter.value);
+    });
+
+    resetFilterBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      monthFilter.value = '';
+      yearFilter.value = '';
+      loadEmployees();
+    });
+
+    async function showEmployeeDetails(id) {
+      const res = await fetch(`/employeeDetails/${id}`);
+      const emp = await res.json();
+
+      document.getElementById('empId').value = emp._id;
+      document.getElementById('empName').value = emp.name || '';
+      document.getElementById('empEmail').value = emp.email || '';
+      document.getElementById('empPhone').value = emp.phone || '';
+      document.getElementById('empSkill').value = emp.skillSet || '';
+      document.getElementById('empExp').value = emp.experience || '';
+      document.getElementById('empLoc').value = emp.location || '';
+      document.getElementById('empNation').value = emp.nationality || '';
+      document.getElementById('empClient').value = emp.client || '';
+      document.getElementById('empRole').value = emp.role || '';
+      document.getElementById('empRecruiter').value = emp.recruiter || '';
+      document.getElementById('empSource').value = emp.source || '';
+      document.getElementById('empStage').value = emp.stage || '';
+      document.getElementById('empAvail').value = emp.availability || '';
+      document.getElementById('empRate').value = emp.rate || '';
+      document.getElementById('empCurrency').value = emp.currency || '';
+      document.getElementById('empCV').value = emp.cvLink || '';
+      document.getElementById('empRemarks').value = emp.remarks || '';
+      document.getElementById('empCreatedTime').value = new Date(emp.createdAt).toLocaleString();
+
+      modal.show();
+    }
+
+    // Save changes
+    document.getElementById('saveChanges').addEventListener('click', async () => {
+  const updatedData = {
+    name: document.getElementById('empName').value,
+    email: document.getElementById('empEmail').value,
+    phone: document.getElementById('empPhone').value,
+    skillSet: document.getElementById('empSkill').value,
+    experience: document.getElementById('empExp').value,
+    location: document.getElementById('empLoc').value,
+    nationality: document.getElementById('empNation').value,
+    client: document.getElementById('empClient').value,
+    role: document.getElementById('empRole').value,
+    recruiter: document.getElementById('empRecruiter').value,
+    source: document.getElementById('empSource').value,
+    stage: document.getElementById('empStage').value,
+    availability: document.getElementById('empAvail').value,
+    rate: document.getElementById('empRate').value,
+    currency: document.getElementById('empCurrency').value,
+    cvLink: document.getElementById('empCV').value,
+    remarks: document.getElementById('empRemarks').value
+  };
+
+  try {
+    const name = document.getElementById('empName').value;
+    const response = await fetch(`/updateEmployee/${encodeURIComponent(updatedData.name)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedData)
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert('✅ Employee updated successfully!');
+      bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide();
+      searchEmployees(document.getElementById('searchInput').value);
+    } else {
+      alert('❌ Failed to update: ' + result.error);
+    }
+  } catch (error) {
+    console.error('Error updating employee:', error);
+  }
+});
+
+
+    // Delete employee
+    document.getElementById('deleteBtn').addEventListener('click', async () => {
+      const id = document.getElementById('empId').value;
+      if (!confirm('Are you sure you want to delete this employee?')) return;
+      const res = await fetch(`/deleteEmployee/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      alert(result.message || 'Deleted');
+      modal.hide();
+      loadEmployees(searchInput.value.trim(), monthFilter.value, yearFilter.value);
+    });
+  </script>
+</body>
+</html>
