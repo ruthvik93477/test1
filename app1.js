@@ -28,13 +28,10 @@ app.use(session({
   mongoose.connect(conn);
   const userName = process.env.user_name;
   const pass = process.env.PASSWORD;
+  const staffName = process.env.staff_name;
   const passStaff = process.env.PASSWORD_STAFF;
-  const us1 = process.env.usr1;
-  const pw1 = process.env.pwd1;
-  const us2 = process.env.usr2;
-  const pw2 = process.env.pwd2;
-  const us3 = process.env.usr3;
-  const pw3 = process.env.pwd3;
+  const passStaff2 = process.env.PASSWORD_STAFF2;
+
   // Authentication middleware
 
   const authenticate = (req, res, next) => {
@@ -52,9 +49,9 @@ app.use(session({
     const { username, password } = req.session;
     const { usernameStaff, passwordStaff } = req.session;
     const isAuthenticated = username === userName && password === pass;
-    const isAuthenticatedStaff = (usernameStaff === userName && passwordStaff === passStaff)||(usernameStaff===us1&&passwordStaff===pw1)
-                                  ||(usernameStaff===us2&&passwordStaff===pw2)||(usernameStaff===us3&&passwordStaff===pw3);
-    if (isAuthenticated|| isAuthenticatedStaff) {
+    const isAuthenticatedStaff = (usernameStaff === staffName && passwordStaff === passStaff);
+    const authenticateCandidate = (usernameStaff === staffName && passwordStaff === passStaff2)
+    if (isAuthenticated|| isAuthenticatedStaff||authenticateCandidate) {
       next();
     } else {
       let g = fs.readFileSync("public/unauth.html");
@@ -358,45 +355,16 @@ app.post('/landing',(req, res) => {
   app.post('/landingLeave',(req, res) => {
     const { usernameStaff, passwordStaff } = req.body;
     //res.render('staffLanding', { user: usernameStaff, pass: passwordStaff });
-    if (usernameStaff === userName && passwordStaff === passStaff) {
+    if (usernameStaff === staffName && passwordStaff === passStaff) {
       req.session.usernameStaff = usernameStaff;
       req.session.passwordStaff = passwordStaff;
-      console.log(usernameStaff);
       res.redirect('/staffL');
-    } else if (usernameStaff === us1 && passwordStaff === pw1) {
+    }
+    else if(usernameStaff === staffName && passwordStaff === passStaff2){ 
       req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.render('/landingLeave');
-    } else if (usernameStaff === us2 && passwordStaff === pw2) {
-      req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
-    } else if (usernameStaff === us3 && passwordStaff === pw3) {
-      req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
-    } else if (usernameStaff === us4 && passwordStaff === pw4) {
-      req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
-    } else if (usernameStaff === us5 && passwordStaff === pw5) {
-      req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
-    } else if (usernameStaff === us6 && passwordStaff === pw6) {
-      req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
-    } else if (usernameStaff === us7 && passwordStaff === pw7) {
-      req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
-    } else if (usernameStaff === us8 && passwordStaff === pw8) {
-      req.session.usernameStaff = usernameStaff;
-      req.session.passwordStaff = passwordStaff;
-      res.redirect('/landingLeave');
-    } 
-    else {
+      req.session.passwordStaff = passStaff2;
+      res.redirect('/displayCandidates');
+    } else {
       res.sendFile(__dirname + "/public/invalid.html")
     }
   });
@@ -1215,7 +1183,7 @@ app.get('/folders/:folderId', authenticateStaff, async (req, res) => {
 });*/
 
 // Download file
-app.get('/download/:fileId', authenticate, async (req, res) => {
+app.get('/download/:fileId', authenticate, authenticateStaff, async (req, res) => {
   const fileId = req.params.fileId;
   try {
     const fileMeta = await drive.files.get({ fileId, fields: 'name' });
@@ -1328,3 +1296,196 @@ app.post('/shortlist/:fileId', express.json(), (req, res) => {
   saveShortlist(shortlist);
   res.json({ success: true, shortlisted: shortlist.includes(fileId) });
 });
+
+////////////////////////////////////// Employee works //////////////////////////////////////////////////
+
+let employeeSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  phone: String,
+  skillSet: String,
+  experience: String,
+  location: String,
+  nationality: String,
+  client: String,
+  role: String,
+  recruiter: String,
+  source: String,
+  stage: String,
+  availability: String,
+  rate: String,
+  currency: String,
+  cvLink: String,
+  resume: String,
+  createdAt: String
+});
+
+let Employee = mongoose.model('Employee', employeeSchema);
+
+app.get('/employeeForm', authenticateStaff, (req, res) => {
+  res.sendFile(__dirname + '/public/ats1.html');
+});
+
+app.post('/employeeForm', authenticateStaff, async(req, res)=>{
+  let {name,email,phone,skillSet,experience,location,nationality,client,role,recruiter,source,stage,availability,rate,currency,cvLink,remarks} = req.body;
+  console.log(remarks);
+  let created = new Date();
+  let createdAt = created.getDate() + '-' + (created.getMonth() + 1) + '-' + created.getFullYear();
+  try{
+      const employeeData = new Employee({
+          name: name,
+          email: email,
+          phone: phone,
+          skillSet: skillSet,
+          experience: experience,
+          location: location,
+          nationality: nationality,
+          client: client,
+          role: role,
+          recruiter: recruiter,
+          source: source,
+          stage: stage,
+          availability: availability,
+          rate: rate,
+          currency: currency,
+          cvLink: cvLink,
+          remarks: remarks,
+          createdAt: createdAt
+      });
+      await employeeData.save();
+      res.status(201).json({ message: 'Employee data saved successfully' });
+  } catch (error) {
+      console.error('Error saving employee data:', error);
+      res.status(500).json({ error: 'Failed to save employee data' });
+  }
+});
+
+app.get('/displayCandidates', authenticateStaff, (req, res) => {
+  res.sendFile(__dirname + '/public/displayCandidates.html');
+});
+
+app.get('/searchEmployee', authenticateStaff, async (req, res) => {
+  try {
+    const query = req.query.name || '';
+    const employees = await Employee.find(
+      { name: { $regex: query, $options: 'i' } },
+      { name: 1, email: 1, phone: 1, skillSet: 1, client: 1, role: 1, _id: 0 }
+    );
+    res.status(200).json(employees);
+  } catch (error) {
+    console.error('Error searching employees:', error);
+    res.status(500).json({ error: 'Failed to search employees' });
+  }
+});
+
+
+app.get('/employeeDetails', authenticateStaff, async (req, res) => {
+  try {
+    const name = req.query.name;
+    if (!name) return res.status(400).json({ error: 'Name is required' });
+
+    const employee = await Employee.findOne({ name: name });
+    if (!employee) return res.status(404).json({ error: 'Employee not found' });
+
+    res.status(200).json(employee);
+  } catch (error) {
+    console.error('Error fetching employee details:', error);
+    res.status(500).json({ error: 'Failed to fetch employee details' });
+  }
+});
+
+// Update employee details
+/*app.put('/updateEmployee/:id', authenticateStaff, async (req, res) => {
+  try {
+    const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Employee not found' });
+
+    res.status(200).json({ message: 'Employee updated successfully', employee: updated });
+  } catch (error) {
+    console.error('Error updating employee:', error);
+    res.status(500).json({ error: 'Failed to update employee' });
+  }
+});*/
+
+app.put('/updateEmployee/:name', authenticateStaff, async (req, res) => {
+  try {
+    const updatedEmployee = await Employee.findOneAndUpdate(
+      { name: req.params.name },   // find by name
+      req.body,                      // apply updated fields
+      { new: true }                 // return updated doc
+    );
+
+    console.log(updatedEmployee);                  // return updated doc
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.status(200).json({ message: 'Employee updated successfully', data: updatedEmployee });
+  } catch (error) {
+    console.error('Error updating employee:', error);
+    res.status(500).json({ error: 'Failed to update employee' });
+  }
+});
+
+
+// Delete employee
+app.delete('/deleteEmployee/:id', authenticateStaff, async (req, res) => {
+  try {
+    const deleted = await Employee.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Employee not found' });
+
+    res.status(200).json({ message: 'Employee deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting employee:', error);
+    res.status(500).json({ error: 'Failed to delete employee' });
+  }
+});
+
+// Fetch all or filtered employees
+app.get('/getEmployees', authenticateStaff, async (req, res) => {
+  try {
+    const { query, month, year } = req.query;
+    const search = {};
+
+    if (query) {
+      search.name = { $regex: query, $options: 'i' };
+    }
+
+    // Fetch all employees first
+    let employees = await Employee.find(search).sort({ createdAt: -1 });
+
+    // Apply month/year filtering in JS
+    if (month || year) {
+      employees = employees.filter(emp => {
+        if (!emp.createdAt) return false;
+
+        // Split "DD-MM-YYYY"
+        const [day, mon, yr] = emp.createdAt.split('-').map(Number);
+
+        if (month && year) return mon === Number(month) && yr === Number(year);
+        if (month) return mon === Number(month);
+        if (year) return yr === Number(year);
+
+        return true;
+      });
+    }
+
+    res.json(employees);
+  } catch (err) {
+    console.error('getEmployees error:', err);
+    res.status(500).json({ error: 'Failed to fetch employees' });
+  }
+});
+
+
+// Get single employee details
+app.get('/employeeDetails/:id', authenticateStaff, async (req, res) => {
+  const emp = await Employee.findById(req.params.id);
+  res.json(emp);
+});
+
+app.get('/staff1',authenticate, async(req, res) => {
+  res.sendFile(__dirname + '/public/displayStaff1.html');
+});
+
