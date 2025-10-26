@@ -79,23 +79,29 @@
                 <li class="nav-item">
                     <a class="nav-link active" href="/landingLeave"><button class="btn bg-light text-dark"><b><i>Leave_Tracker</i></b></button></a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link active" href="./contact"><button class="btn bg-light text-dark"><b><i>Contact_Dev</i></b></button></a>
-                </li>
-                <li class="nav-item">
+                </li> -->
+                <!-- <li class="nav-item">
                     <a class="nav-link active" href="/display"><button class="btn bg-light text-dark"><b><i>Invoice_Details</i></b></button></a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link active" href="/landing1"><button class="btn bg-light text-dark"><b><i>Offer_Details</i></b></button></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link active" href="/uploadUser"><button class="btn bg-light text-dark"><b><i>User_link</i></b></button></a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link active"><button class="btn bg-light text-dark" id="copyButton"><b><i>Copy_User_Link</i></b></button></a>
-                </li>
+                </li> -->
+                <!-- <li class="nav-item">
+                    <a class="nav-link active" href="/createFolder"><button class="btn bg-light text-dark"><b><i>Posting</i></b></button></a>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link active" href="/createFolder"><button class="btn bg-light text-dark"><b><i>Posting</i></b></button></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/staff1"><button class="btn bg-light text-dark"><b><i>Staff</i></b></button></a>
                 </li>
             </ul>
             </div>
@@ -106,17 +112,17 @@
             <div class="row mt-2">
                 <h1 class="text-center mb-5 text-light"><b>Generate Invoice</b></h1>
                 <div class="col-sm text-center mt-5">
-                    <a href="/kpmgUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>KPMG</i></b></button></a>
-                    <a href="/atkFormUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA to AITEK</i></b></button></a>
-                    <a href="/atkFormUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA to RADIANT</i></b></button></a>
-                    <a href="/rzUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA to RIZING</i></b></button></a>
-                    <a href="formjpeg1.html"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>Payment receipts</i></b></button></a>
+                    <!-- <a href="/kpmgUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>KPMG</i></b></button></a> -->
+                    <!-- <a href="/atkFormUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA to RADIANT</i></b></button></a>
+                    <a href="/rzUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA to RIZING</i></b></button></a> -->
+                    <!-- <a href="formjpeg1.html"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>Payment receipts</i></b></button></a> -->
                     <a href="formjpeg2.html"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>Payslip</i></b></button></a>
                     <a href="/form3upload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b class="fs-5"><i>SEA</i></b><b><i> OPERATIONS INVOICE</i></b></button></a>
-                    <a href="/indFormUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA to O2</i></b></button></a>
+                    <a href="/indFormUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA</i></b></button></a>
                     <a href="/icmUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>Infosys consultancy Malaysia</i></b></button></a>
-                    <a href="/tigerUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>KGTiger</i></b></button></a>
+                   <!--<a href="/tigerUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>KGTiger</i></b></button></a>-->
                     <a href="/elvinUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>Sonata software</i></b></button></a>
+                    <a href="/atkFormUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK INDIA to AITEK</i></b></button></a>
                     <a href="/usUpload"><button class="btn-outline-dark btn-1 mb-2 me-2"><b><i>AITEK USA</i></b></button></a>
                 </div>
                 <div class="col-sm text-center mt-4">
@@ -126,19 +132,19 @@
         </div>
 </body>
 <script>
-    document.getElementById('copyButton').addEventListener('click', function() {
-        const link = 'https://aitek-sg.onrender.com/uploadUser';
-        const tempInput = document.createElement('input');
-        document.body.appendChild(tempInput);
-        tempInput.value = link;
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        const acknowledgement = document.getElementById('acknowledgement');
-        acknowledgement.style.display = 'block';
-        setTimeout(function() {
-            acknowledgement.style.display = 'none';
-        }, 2000);
-    });
+    // document.getElementById('copyButton').addEventListener('click', function() {
+    //     const link = 'https://aitek-sg.onrender.com/uploadUser';
+    //     const tempInput = document.createElement('input');
+    //     document.body.appendChild(tempInput);
+    //     tempInput.value = link;
+    //     tempInput.select();
+    //     document.execCommand('copy');
+    //     document.body.removeChild(tempInput);
+    //     const acknowledgement = document.getElementById('acknowledgement');
+    //     acknowledgement.style.display = 'block';
+    //     setTimeout(function() {
+    //         acknowledgement.style.display = 'none';
+    //     }, 2000);
+    // });
 </script>
 </html>
