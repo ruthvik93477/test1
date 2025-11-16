@@ -159,6 +159,7 @@
           <div class="card-body">
             <h5 class="card-title text-primary mb-2">${emp.name}</h5>
             <p><strong>Skill:</strong> ${emp.skillSet || 'N/A'} | <strong>Client:</strong> ${emp.client || 'N/A'}</p>
+            <p><strong>Stage:</strong> ${emp.stage || 'N/A'} </p>
             <p class="text-muted mb-0"><small>Uploaded: ${new Date(emp.createdAt).toLocaleDateString()}</small></p>
           </div>
         </div>
@@ -268,3 +269,4 @@
   </script>
 </body>
 </html>
+
