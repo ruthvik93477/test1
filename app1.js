@@ -1555,7 +1555,9 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
 
     // Email transporter
     let transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: Mail,
         pass: passKey
@@ -1614,4 +1616,5 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
     res.status(500).json({ error: "Failed to update status or send email" });
   }
 });
+
 
