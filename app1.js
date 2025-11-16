@@ -1542,6 +1542,7 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
   try {
     const { status } = req.body;
     const passKey = process.env.pass_key;
+    const Mail = process.env.mail
     const leave = await LeaveApproval.findByIdAndUpdate(
       req.params.id,
       { status: status },
@@ -1556,7 +1557,7 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
     let transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "ruthvikkanagani@gmail.com",
+        user: Mail,
         pass: passKey
       }
     });
@@ -1599,7 +1600,7 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
 
     // Send email
     await transporter.sendMail({
-      from: "ruthvikkanagani@gmail.com",
+      from: "ex@gmail.com",
       to: leave.email,
       subject: `Leave Request ${status}`,
       text: messageText,
@@ -1613,3 +1614,4 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
     res.status(500).json({ error: "Failed to update status or send email" });
   }
 });
+
