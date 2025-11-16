@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leave Requests - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+  <div class="container mt-5">
+
+    <div class="d-flex justify-content-between mb-4">
+      <h2>Leave Requests</h2>
+
+      <div class="d-flex align-items-center">
+        <select id="statusFilter" class="form-select w-50 mx-2">
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Declined">Declined</option>
+        </select>
+        <select id="monthFilter" class="form-select">
+          <option value="All">All Months</option>
+          <option value="01">January</option>
+          <option value="02">February</option>
+          <option value="03">March</option>
+          <option value="04">April</option>
+          <option value="05">May</option>
+          <option value="06">June</option>
+          <option value="07">July</option>
+          <option value="08">August</option>
+          <option value="09">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+        <!-- <button id="btnHide">hide French</button>
+        <button id="btnShow">show French</button> -->
+        <label for="searching" class="mx-4"><b>Search:</b></label>
+        <input name="searching" type="text" class="form-control w-100" placeholder="Search by name..." id="searchInput">
+      </div>
+    </div>
+    
+    <table class="table table-bordered table-striped shadow" id="tableIn">
+      <col class="col1"/>
+      <col class="col2"/>
+      <col class="col3"/>
+      <col class="col4"/>
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Dates</th>
+          <th>Type</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="leaveTable"></tbody>
+    </table>
+
+  </div>
+
+  <script>
+  let allLeaves = [];
+
+  async function loadLeaves() {
+    let res = await fetch('/getLeaves');
+    allLeaves = await res.json();
+    applyFilters();
+  }
+
+  function applyFilters() {
+      let nameValue = document.getElementById("searchInput").value.toLowerCase();
+      let statusValue = document.getElementById("statusFilter").value;
+      let monthValue = document.getElementById("monthFilter").value;
+
+      let filtered = allLeaves.filter(l => {
+        let matchesName = l.name.toLowerCase().includes(nameValue);
+        let matchesStatus = statusValue === "All" || l.status === statusValue;
+
+        // Month filtering from l.dates array
+        let matchesMonth = true;
+        if (monthValue !== "All") {
+          matchesMonth = l.dates.some(date => date.split("-")[1] === monthValue);
+        }
+
+        return matchesName && matchesStatus && matchesMonth;
+      });
+
+      renderTable(filtered);
+    }
+
+  function renderTable(data) {
+    let tbody = document.getElementById("leaveTable");
+    tbody.innerHTML = "";
+
+    data.slice().reverse().forEach(l => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${l.name}</td>
+          <td>${l.email}</td>
+          <td>${l.dates.join('<br>')}</td>
+          <td>${l.type}</td>
+          <td>${l.reason}</td>
+          <td>${l.status}</td>
+          <td>
+            <button class="btn btn-success btn-sm" onclick="updateStatus('${l._id}', 'Approved')">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="updateStatus('${l._id}', 'Declined')">Decline</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  document.getElementById("searchInput").addEventListener("input", applyFilters);
+  document.getElementById("statusFilter").addEventListener("change", applyFilters);
+  document.getElementById("monthFilter").addEventListener("change", applyFilters);
+
+  async function updateStatus(id, status) {
+    let res = await fetch(`/updateLeaveStatus/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+
+    let data = await res.json();
+    alert(data.message);
+    loadLeaves();
+  }
+
+  loadLeaves();
+
+  document.onkeydown = function(e) {
+        if (e.ctrlKey && 
+            (
+             e.keyCode === 85 || 
+             e.keyCode === 117)) {
+            alert('Not allowed');
+            return false;
+        } else {
+            return true;
+        }
+};
+
+
+function show_hide_column( col_no, do_show ){
+   const table  = document.getElementById( 'tableIn' )
+   const column = table.getElementsByTagName( 'col' )[col_no]
+   if ( column ){
+      column.style.visibility = do_show?"":"collapse";
+   }
+}
+
+const btnHide = document.getElementById( 'btnHide' )
+btnHide.addEventListener( "click", () => show_hide_column( 1, false ))
+
+const btnShow = document.getElementById( 'btnShow' )
+btnShow.addEventListener( "click", () => show_hide_column( 1, true ))
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leave Request Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Litepicker for multi-date selections -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css" />
+  <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+</head>
+
+<body class="bg-light">
+
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+
+        <div class="card shadow-lg">
+          <div class="card-header bg-primary text-white text-center">
+            <h4>Leave Request Form</h4>
+          </div>
+
+          <div class="card-body">
+            <form id="leaveForm">
+
+              <div class="mb-3">
+                <label class="form-label">Employee Name</label>
+                <input type="text" class="form-control" required name="name">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Email ID</label>
+                <input type="email" class="form-control" required name="email">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Select Leave Dates</label>
+                <input id="datePicker" class="form-control" name="dates" placeholder="Select dates" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Leave Type</label>
+                <select class="form-select" name="type" required>
+                  <option value="">Select Leave Type</option>
+                  <option value="Medical Leave">Medical Leave</option>
+                  <option value="Casual Leave">Casual Leave</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Reason</label>
+                <textarea class="form-control" rows="3" required name="reason"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">Submit Leave Request</button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Multi-Date Picker
+    new Litepicker({
+      element: document.getElementById('datePicker'),
+      singleMode: false,
+      numberOfMonths: 2,
+      numberOfColumns: 2,
+      format: "YYYY-MM-DD"
+    });
+
+    // Form submission
+    document.getElementById("leaveForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      
+      // dates will be a comma-separated string → convert to array
+      data.dates = data.dates.split(', ');
+
+      const response = await fetch('/leaveApproval', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      alert(result.message || "Request submitted!");
+      this.reset();
+    });
+
+    document.onkeydown = function(e) {
+        if (e.ctrlKey && 
+            ( 
+             e.keyCode === 85|| 
+             e.keyCode === 117)) {
+            alert('Not allowed :)');
+            return false;
+        } else {
+            return true;
+        }
+};
+
+  </script>
+
+</body>
+</html>
