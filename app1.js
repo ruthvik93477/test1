@@ -1489,3 +1489,127 @@ app.get('/staff1',authenticate, async(req, res) => {
   res.sendFile(__dirname + '/public/displayStaff1.html');
 });
 
+/////////////////////////////////////////Leave approvals////////////////////////////////////////////////////
+let leaveApproval = new mongoose.Schema({
+  name: String,
+  email: String,
+  dates: [String],   // now array
+  reason: String,
+  type: String,
+  status: { type: String, default: "Pending" }
+});
+
+
+app.get('/leaveApproval', (req, res) => {
+  res.sendFile(__dirname + '/public/leaveApproval.html');
+});
+
+let LeaveApproval = mongoose.model('LeaveApproval', leaveApproval);
+
+app.get('/getLeaves', authenticate, async (req, res) => {
+  const leaves = await LeaveApproval.find({});
+  res.json(leaves);
+  //res.sendFile(__dirname + '/public/adminLeaves.html');
+});
+
+app.get('/adminLeaves', authenticate, async(req, res) => {
+  res.sendFile(__dirname + '/public/adminLeaves.html');
+})
+
+app.post('/leaveApproval', async(req, res)=> {
+  let {name,email,reason,type,dates} = req.body;
+
+  try {
+    const leaveApprovalData = new LeaveApproval({
+      name,
+      email,
+      type,
+      reason,
+      dates     // array of dates
+    });
+
+    await leaveApprovalData.save();
+    res.status(201).json({ message: 'Data saved successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to save data' });
+  }
+});
+
+const nodemailer = require('nodemailer');
+const { auth } = require('googleapis/build/src/apis/abusiveexperiencereport/index.js');
+
+app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
+  try {
+    const { status } = req.body;
+    const passKey = process.env.pass_key;
+    const leave = await LeaveApproval.findByIdAndUpdate(
+      req.params.id,
+      { status: status },
+      { new: true }
+    );
+
+    if (!leave) {
+      return res.status(404).json({ error: "Leave request not found" });
+    }
+
+    // Email transporter
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "ruthvikkanagani@gmail.com",
+        pass: passKey
+      }
+    });
+
+    // Format selected dates nicely
+    const formattedDates = leave.dates.join(", ");
+
+    // Email message body
+    let messageText = `
+      Hello ${leave.name},
+
+      Your leave request has been *${status}*.
+
+      **Leave Details:**
+      • Leave Dates: ${formattedDates}
+      • Leave Type: ${leave.type}
+      • Reason: ${leave.reason}
+
+      Thank you.
+    `;
+
+    // HTML version (optional but looks better)
+    let messageHTML = `
+      <p>Hello <strong>${leave.name}</strong>,</p>
+
+      <p>Your leave request has been 
+      <strong style="color:${status === "Approved" ? "green" : "red"};">
+        ${status}
+      </strong>.</p>
+
+      <h3>Leave Details</h3>
+      <ul>
+        <li><strong>Leave Dates:</strong> ${formattedDates}</li>
+        <li><strong>Leave Type:</strong> ${leave.type}</li>
+        <li><strong>Reason:</strong> ${leave.reason}</li>
+      </ul>
+
+      <p>Thank you.</p>
+    `;
+
+    // Send email
+    await transporter.sendMail({
+      from: "ruthvikkanagani@gmail.com",
+      to: leave.email,
+      subject: `Leave Request ${status}`,
+      text: messageText,
+      html: messageHTML
+    });
+
+    res.json({ message: "Status updated & email sent successfully!" });
+
+  } catch (error) {
+    console.error("Email Error:", error);
+    res.status(500).json({ error: "Failed to update status or send email" });
+  }
+});
