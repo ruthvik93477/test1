@@ -1509,14 +1509,13 @@ let LeaveApproval = mongoose.model('LeaveApproval', leaveApproval);
 app.get('/getLeaves', authenticate, async (req, res) => {
   const leaves = await LeaveApproval.find({});
   res.json(leaves);
-  //res.sendFile(__dirname + '/public/adminLeaves.html');
 });
 
 app.get('/adminLeaves', authenticate, async(req, res) => {
   res.sendFile(__dirname + '/public/adminLeaves.html');
 })
 
-app.post('/leaveApproval', async(req, res)=> {
+/*app.post('/leaveApproval', async(req, res)=> {
   let {name,email,reason,type,dates} = req.body;
 
   try {
@@ -1533,12 +1532,118 @@ app.post('/leaveApproval', async(req, res)=> {
   } catch (error) {
     res.status(500).json({ error: 'Failed to save data' });
   }
+});*/
+
+app.post("/leaveApproval", async (req, res) => {
+  try {
+    const { name, email, dates, type, reason } = req.body;
+
+    // Save to DB
+    const leave = await LeaveApproval.create({
+      name,
+      email,
+      dates,
+      type,
+      reason,
+      status: "Pending"
+    });
+
+    // Send emails
+    await sendEmployeeMail(leave);  // mail to employee
+    await sendAdminMail(leave);     // mail to HR/Manager
+
+    return res.json({ message: "Leave Request Submitted Successfully!" });
+
+  } catch (err) {
+    console.error("Leave Request Error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
+
 
 const nodemailer = require('nodemailer');
 const { auth } = require('googleapis/build/src/apis/abusiveexperiencereport/index.js');
 
-app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
+const passKey = process.env.pass_key;
+const Mail = process.env.mail
+
+
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,   // <-- MUST USE smtp-brevo.com login
+    pass: process.env.SENDER_PASS
+  }
+});
+
+
+async function sendEmployeeMail(leave) {
+  await transporter.sendMail({
+    from: `"HR Team" <${process.env.SENDER_EMAIL}>`,
+    to: leave.email,
+    subject: "Leave Request Received",
+    html: `
+      <h3>Hello ${leave.name},</h3>
+      <p>Your leave request has been submitted successfully.</p>
+      <p><strong>Type:</strong> ${leave.type}</p>
+      <p><strong>Dates:</strong> ${leave.dates.join(", ")}</p>
+      <p><strong>Reason:</strong> ${leave.reason}</p>
+      <br/>
+      <p>Regards,<br/>HR Team</p>
+    `
+  });
+}
+
+async function sendAdminMail(leave) {
+  const notifyEmails = [
+    process.env.NOTIFY_EMAIL_1,
+    process.env.NOTIFY_EMAIL_2
+  ];
+
+  await transporter.sendMail({
+    from: `"Leave Alerts" <${process.env.SENDER_EMAIL}>`,
+    to: notifyEmails, // multiple recipients
+    subject: `Leave Request Applied - ${leave.name}`,
+    html: `
+      <h3>New Leave Request Submitted</h3>
+      <p><strong>Name:</strong> ${leave.name}</p>
+      <p><strong>Email:</strong> ${leave.email}</p>
+      <p><strong>Type:</strong> ${leave.type}</p>
+      <p><strong>Dates:</strong> ${leave.dates.join(", ")}</p>
+      <p><strong>Reason:</strong> ${leave.reason}</p>
+      <br/>
+      <p>Please review and update the leave status.</p>
+    `
+  });
+}
+
+
+async function sendLeaveStatusMail(email, name, status, dates, type) {
+  try {
+    await transporter.sendMail({
+      from: Mail,
+      to: email,
+      subject: "Leave Request Update",
+      html: `
+        <h3>Hello ${name},</h3>
+        <p>Your leave request has been <strong>${status}</strong>.</p>
+        <p><strong>Type:</strong> ${type}</p>
+        <p><strong>Dates Applied:</strong> ${dates.join(", ")}</p>
+        <br/>
+        <p>Regards,<br/>HR Team</p>
+      `
+    });
+
+    console.log("Email sent successfully!");
+  } catch (err) {
+    console.error("Email error:", err);
+  }
+}
+
+
+/*app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
   try {
     const { status } = req.body;
     const passKey = process.env.pass_key;
@@ -1602,7 +1707,7 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
 
     // Send email
     await transporter.sendMail({
-      from: "ex@gmail.com",
+      from: "ruthviki@gmail.com",
       to: leave.email,
       subject: `Leave Request ${status}`,
       text: messageText,
@@ -1615,6 +1720,39 @@ app.put('/updateLeaveStatus/:id', authenticate,async (req, res) => {
     console.error("Email Error:", error);
     res.status(500).json({ error: "Failed to update status or send email" });
   }
+});*/
+
+app.put("/updateLeaveStatus/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    const leave = await LeaveApproval.findById(id);
+
+    if (!leave) {
+      return res.status(404).json({ message: "Leave not found" });
+    }
+
+    leave.status = status;
+    await leave.save();
+
+    // Send email
+    console.log(leave.email);
+    await sendLeaveStatusMail(
+      leave.email,
+      leave.name,
+      leave.status,
+      leave.dates,      // must be an array from your updated schema
+      leave.type
+    );
+
+    return res.json({ message: "Leave status updated & email sent" });
+
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
+
 
 
